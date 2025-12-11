@@ -1,0 +1,49 @@
+name: presupuesto20
+description: Aplicación de escritorio para gestión de presupuestos de obras
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # Database
+  drift: ^2.14.0
+  sqlite3_flutter_libs: ^0.5.18
+  path_provider: ^2.1.1
+  path: ^1.8.3
+  
+  # State Management
+  provider: ^6.1.1
+  
+  # Storage
+  shared_preferences: ^2.2.2
+  
+  # Window Management
+  window_manager: ^0.3.7
+  
+  # UI
+  cupertino_icons: ^1.0.6
+  
+  # Utils
+  intl: ^0.18.1
+  crypto: ^3.0.3
+  file_picker: ^6.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  
+  # Drift Code Generation
+  drift_dev: ^2.14.0
+  build_runner: ^2.4.7
+
+flutter:
+  uses-material-design: true
+  
+  # assets:
+  #   - images/
