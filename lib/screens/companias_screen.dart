@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/companias_provider.dart';
+import '../providers/monedas_provider.dart';
 import '../database/database.dart';
 
 class CompaniasScreen extends StatefulWidget {
@@ -328,6 +329,7 @@ class _CompaniasScreenState extends State<CompaniasScreen> {
     );
     final formKey = GlobalKey<FormState>();
     bool activa = isEditing ? _selectedCompania!.activa : true;
+    int? monedaId = isEditing ? _selectedCompania!.monedaId : null;
 
     return StatefulBuilder(
       builder: (context, setFormState) {
@@ -384,6 +386,7 @@ class _CompaniasScreenState extends State<CompaniasScreen> {
                           direccion: direccion.isEmpty ? null : direccion,
                           telefono: telefono.isEmpty ? null : telefono,
                           email: email.isEmpty ? null : email,
+                          monedaId: monedaId,
                           activa: activa,
                         );
                       } else {
@@ -394,6 +397,7 @@ class _CompaniasScreenState extends State<CompaniasScreen> {
                           direccion: direccion.isEmpty ? null : direccion,
                           telefono: telefono.isEmpty ? null : telefono,
                           email: email.isEmpty ? null : email,
+                          monedaId: monedaId,
                           activa: activa,
                         );
                       }
@@ -507,6 +511,36 @@ class _CompaniasScreenState extends State<CompaniasScreen> {
                                 }
                               }
                               return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          Consumer<MonedasProvider>(
+                            builder: (context, monedasProvider, _) {
+                              return DropdownButtonFormField<int?>(
+                                value: monedaId,
+                                decoration: const InputDecoration(
+                                  labelText: 'Moneda',
+                                  prefixIcon: Icon(Icons.monetization_on_outlined),
+                                  border: OutlineInputBorder(),
+                                ),
+                                items: [
+                                  const DropdownMenuItem<int?>(
+                                    value: null,
+                                    child: Text('Seleccionar moneda...'),
+                                  ),
+                                  ...monedasProvider.monedas.map((moneda) {
+                                    return DropdownMenuItem<int?>(
+                                      value: moneda.id,
+                                      child: Text('${moneda.nombre} (${moneda.signo})'),
+                                    );
+                                  }),
+                                ],
+                                onChanged: (value) {
+                                  setFormState(() {
+                                    monedaId = value;
+                                  });
+                                },
+                              );
                             },
                           ),
                           const SizedBox(height: 16),

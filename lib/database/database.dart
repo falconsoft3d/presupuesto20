@@ -7,12 +7,12 @@ import 'tables.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(tables: [Obras, Proyectos, Presupuestos, Contactos, Productos, Empleados, Usuarios, Companias, UnidadesMedida, Monedas, CategoriasProductos, Estados])
+@DriftDatabase(tables: [Obras, Proyectos, Presupuestos, Contactos, Productos, Empleados, Usuarios, Companias, UnidadesMedida, Monedas, CategoriasProductos, Estados, Conceptos])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 17;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -65,6 +65,15 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(contactos, contactos.foto);
         await m.addColumn(usuarios, usuarios.foto);
         await m.addColumn(presupuestos, presupuestos.estadoId);
+      }
+      if (from < 15) {
+        await m.addColumn(companias, companias.monedaId);
+      }
+      if (from < 16) {
+        await m.addColumn(presupuestos, presupuestos.tipoCalculo);
+      }
+      if (from < 17) {
+        await m.createTable(conceptos);
       }
     },
   );
@@ -269,6 +278,23 @@ class AppDatabase extends _$AppDatabase {
   
   Future<int> deleteEstado(int id) => 
       (delete(estados)..where((t) => t.id.equals(id))).go();
+
+  // CRUD Operations for Conceptos
+  Future<List<Concepto>> getAllConceptos() => select(conceptos).get();
+  
+  Future<Concepto> getConcepto(int id) => 
+      (select(conceptos)..where((t) => t.id.equals(id))).getSingle();
+  
+  Stream<List<Concepto>> watchAllConceptos() => select(conceptos).watch();
+  
+  Future<int> insertConcepto(ConceptosCompanion concepto) => 
+      into(conceptos).insert(concepto);
+  
+  Future<bool> updateConcepto(Concepto concepto) => 
+      update(conceptos).replace(concepto);
+  
+  Future<int> deleteConcepto(int id) => 
+      (delete(conceptos)..where((t) => t.id.equals(id))).go();
 }
 
 LazyDatabase _openConnection() {

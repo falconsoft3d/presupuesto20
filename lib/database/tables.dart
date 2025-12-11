@@ -35,6 +35,7 @@ class Presupuestos extends Table {
   IntColumn get companiaId => integer().nullable().references(Companias, #id)();
   IntColumn get monedaId => integer().nullable().references(Monedas, #id)();
   IntColumn get estadoId => integer().nullable().references(Estados, #id)();
+  TextColumn get tipoCalculo => text().withDefault(const Constant('Estandar'))(); // Estandar, Apu
   DateTimeColumn get fechaCreacion => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get fechaModificacion => dateTime().withDefault(currentDateAndTime)();
 }
@@ -98,6 +99,7 @@ class Companias extends Table {
   TextColumn get telefono => text().nullable().withLength(max: 50)();
   TextColumn get email => text().nullable().withLength(max: 200)();
   TextColumn get logo => text().nullable()(); // Path al logo
+  IntColumn get monedaId => integer().nullable().references(Monedas, #id)();
   BoolColumn get activa => boolean().withDefault(const Constant(true))();
   DateTimeColumn get fechaCreacion => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get fechaModificacion => dateTime().withDefault(currentDateAndTime)();
@@ -135,3 +137,20 @@ class Estados extends Table {
   DateTimeColumn get fechaCreacion => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get fechaModificacion => dateTime().withDefault(currentDateAndTime)();
 }
+
+@DataClassName('Concepto')
+class Conceptos extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get codigo => text().withLength(min: 1, max: 50)();
+  TextColumn get nombre => text().withLength(min: 1, max: 200)();
+  IntColumn get productoId => integer().nullable().references(Productos, #id)();
+  RealColumn get cantidad => real().withDefault(const Constant(0.0))();
+  RealColumn get coste => real().withDefault(const Constant(0.0))();
+  RealColumn get importe => real().withDefault(const Constant(0.0))();
+  IntColumn get padreId => integer().nullable().references(Conceptos, #id)();
+  IntColumn get presupuestoId => integer().nullable().references(Presupuestos, #id)();
+  TextColumn get tipoRecurso => text().withLength(min: 1, max: 100)(); // Material, Servicio, Mano de obra, etc.
+  DateTimeColumn get fechaCreacion => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get fechaModificacion => dateTime().withDefault(currentDateAndTime)();
+}
+

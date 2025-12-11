@@ -14,6 +14,14 @@ class PresupuestosProvider with ChangeNotifier {
   List<Presupuesto> get presupuestos => _presupuestos;
   bool get isLoading => _isLoading;
 
+  Presupuesto? getPresupuestoById(int id) {
+    try {
+      return _presupuestos.firstWhere((presupuesto) => presupuesto.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<void> loadPresupuestos() async {
     _isLoading = true;
     notifyListeners();
@@ -34,6 +42,7 @@ class PresupuestosProvider with ChangeNotifier {
     int? companiaId,
     int? monedaId,
     int? estadoId,
+    String tipoCalculo = 'Estandar',
   }) async {
     try {
       await database.insertPresupuesto(
@@ -43,6 +52,7 @@ class PresupuestosProvider with ChangeNotifier {
           companiaId: companiaId != null ? Value(companiaId) : const Value.absent(),
           monedaId: monedaId != null ? Value(monedaId) : const Value.absent(),
           estadoId: estadoId != null ? Value(estadoId) : const Value.absent(),
+          tipoCalculo: Value(tipoCalculo),
         ),
       );
       await loadPresupuestos();
@@ -59,6 +69,7 @@ class PresupuestosProvider with ChangeNotifier {
     int? companiaId,
     int? monedaId,
     int? estadoId,
+    String? tipoCalculo,
   }) async {
     try {
       final presupuesto = await database.getPresupuesto(id);
@@ -69,6 +80,7 @@ class PresupuestosProvider with ChangeNotifier {
           companiaId: Value.absentIfNull(companiaId),
           monedaId: Value.absentIfNull(monedaId),
           estadoId: Value.absentIfNull(estadoId),
+          tipoCalculo: tipoCalculo,
           fechaModificacion: DateTime.now(),
         ),
       );

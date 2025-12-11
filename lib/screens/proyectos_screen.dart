@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/proyectos_provider.dart';
 import '../providers/contactos_provider.dart';
 import '../providers/estados_provider.dart';
+import '../providers/settings_provider.dart';
 import '../database/database.dart';
 
 class ProyectosScreen extends StatefulWidget {
@@ -340,10 +341,11 @@ class _ProyectosScreenState extends State<ProyectosScreen> {
     final provider = context.read<ProyectosProvider>();
     final contactosProvider = context.watch<ContactosProvider>();
     final estadosProvider = context.watch<EstadosProvider>();
+    final settingsProvider = context.read<SettingsProvider>();
     final isEditing = _selectedProyecto != null;
     
     final codigoController = TextEditingController(
-      text: isEditing ? _selectedProyecto!.codigo : '',
+      text: isEditing ? _selectedProyecto!.codigo : settingsProvider.generarCodigoProyecto(),
     );
     final nombreController = TextEditingController(
       text: isEditing ? _selectedProyecto!.nombre : '',

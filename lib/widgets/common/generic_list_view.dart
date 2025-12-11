@@ -218,30 +218,33 @@ class _GenericListViewState<T> extends State<GenericListView<T>> {
             child: Column(
               children: [
                 // Table Header
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    border: Border(
-                      bottom: BorderSide(color: Colors.grey.shade300),
-                    ),
-                  ),
-                  child: Table(
-                    columnWidths: {
-                      0: const FixedColumnWidth(40),
-                      for (int i = 0; i < widget.columns.length; i++)
-                        i + 1: FixedColumnWidth(widget.columns[i].width),
-                      widget.columns.length + 1: const FixedColumnWidth(80),
-                    },
-                    children: [
-                      TableRow(
-                        children: [
-                          _buildHeaderCell(''),
-                          for (var column in widget.columns)
-                            _buildHeaderCell(column.label),
-                          _buildHeaderCell(''),
-                        ],
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      border: Border(
+                        bottom: BorderSide(color: Colors.grey.shade300),
                       ),
-                    ],
+                    ),
+                    child: Table(
+                      columnWidths: {
+                        0: const FixedColumnWidth(40),
+                        for (int i = 0; i < widget.columns.length; i++)
+                          i + 1: FixedColumnWidth(widget.columns[i].width),
+                        widget.columns.length + 1: const FixedColumnWidth(80),
+                      },
+                      children: [
+                        TableRow(
+                          children: [
+                            _buildHeaderCell(''),
+                            for (var column in widget.columns)
+                              _buildHeaderCell(column.label),
+                            _buildHeaderCell(''),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 
@@ -264,11 +267,17 @@ class _GenericListViewState<T> extends State<GenericListView<T>> {
                             ],
                           ),
                         )
-                      : ListView.builder(
-                          itemCount: filteredItems.length,
-                          itemBuilder: (context, index) {
-                            return _buildDataRow(filteredItems[index], index);
-                          },
+                      : SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: SizedBox(
+                            width: 40 + widget.columns.fold<double>(0, (sum, col) => sum + col.width) + 80,
+                            child: ListView.builder(
+                              itemCount: filteredItems.length,
+                              itemBuilder: (context, index) {
+                                return _buildDataRow(filteredItems[index], index);
+                              },
+                            ),
+                          ),
                         ),
                 ),
               ],

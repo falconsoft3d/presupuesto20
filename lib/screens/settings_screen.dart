@@ -18,8 +18,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   final Map<String, IconData> _categories = {
     'visualizador': Icons.palette,
+    'secuencias': Icons.format_list_numbered,
     'general': Icons.settings,
     'seguridad': Icons.security,
+    'integracion': Icons.sync,
   };
 
   @override
@@ -132,10 +134,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     switch (key) {
       case 'visualizador':
         return 'Visualizador';
+      case 'secuencias':
+        return 'Secuencias';
       case 'general':
         return 'Opciones generales';
       case 'seguridad':
         return 'Seguridad';
+      case 'integracion':
+        return 'Integración';
       default:
         return key;
     }
@@ -145,10 +151,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     switch (_selectedCategory) {
       case 'visualizador':
         return _buildVisualizadorSettings();
+      case 'secuencias':
+        return _buildSecuenciasSettings();
       case 'general':
         return _buildPlaceholder('Opciones generales', Icons.settings);
       case 'seguridad':
         return _buildSeguridadSettings();
+      case 'integracion':
+        return _buildIntegracionSettings();
       default:
         return const SizedBox.shrink();
     }
@@ -610,6 +620,227 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Widget _buildSecuenciasSettings() {
+    return Consumer<SettingsProvider>(
+      builder: (context, settings, child) {
+        final secProyectoController = TextEditingController(text: settings.secuenciaProyecto);
+        final proxNumProyectoController = TextEditingController(text: settings.proximoNumeroProyecto.toString());
+        final secPresupuestoController = TextEditingController(text: settings.secuenciaPresupuesto);
+        final proxNumPresupuestoController = TextEditingController(text: settings.proximoNumeroPresupuesto.toString());
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Text(
+                'Secuencias',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade800,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Configura las secuencias automáticas para códigos de proyectos y presupuestos',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              // Secuencias de Proyectos
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.folder_open, size: 20, color: Colors.grey.shade700),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Secuencias de Proyectos',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey.shade800,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Define el prefijo y número inicial para los códigos de proyectos (ej: PY00001)',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Divider(height: 1, color: Colors.grey.shade300),
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: secProyectoController,
+                              decoration: InputDecoration(
+                                labelText: 'Prefijo de Proyecto',
+                                hintText: 'PY',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              ),
+                              onChanged: (value) {
+                                if (value.isNotEmpty) {
+                                  settings.setSecuenciaProyecto(value.toUpperCase());
+                                }
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: TextFormField(
+                              controller: proxNumProyectoController,
+                              decoration: InputDecoration(
+                                labelText: 'Próximo Número',
+                                hintText: '1',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              ),
+                              keyboardType: TextInputType.number,
+                              onChanged: (value) {
+                                final num = int.tryParse(value);
+                                if (num != null && num > 0) {
+                                  settings.setProximoNumeroProyecto(num);
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Secuencias de Presupuestos
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.description, size: 20, color: Colors.grey.shade700),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Secuencias de Presupuestos',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey.shade800,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Define el prefijo y número inicial para los códigos de presupuestos (ej: PR00001)',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Divider(height: 1, color: Colors.grey.shade300),
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: secPresupuestoController,
+                              decoration: InputDecoration(
+                                labelText: 'Prefijo de Presupuesto',
+                                hintText: 'PR',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              ),
+                              onChanged: (value) {
+                                if (value.isNotEmpty) {
+                                  settings.setSecuenciaPresupuesto(value.toUpperCase());
+                                }
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: TextFormField(
+                              controller: proxNumPresupuestoController,
+                              decoration: InputDecoration(
+                                labelText: 'Próximo Número',
+                                hintText: '1',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              ),
+                              keyboardType: TextInputType.number,
+                              onChanged: (value) {
+                                final num = int.tryParse(value);
+                                if (num != null && num > 0) {
+                                  settings.setProximoNumeroPresupuesto(num);
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildSeguridadSettings() {
     return Consumer<SettingsProvider>(
       builder: (context, settings, child) {
@@ -735,6 +966,255 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
             ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildIntegracionSettings() {
+    return Consumer<SettingsProvider>(
+      builder: (context, settings, child) {
+        final urlController = TextEditingController(text: settings.rpcUrl);
+        final puertoController = TextEditingController(text: settings.rpcPuerto);
+        final usuarioController = TextEditingController(text: settings.rpcUsuario);
+        final contrasenaController = TextEditingController(text: settings.rpcContrasena);
+        bool isTesting = false;
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Text(
+                    'Integración RPC',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade800,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Configura la conexión RPC para integraciones externas',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Configuración RPC
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.cloud_sync, size: 20, color: Colors.grey.shade700),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Configuración de Conexión',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.grey.shade800,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Ingresa los datos de conexión para el servidor RPC',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Divider(height: 1, color: Colors.grey.shade300),
+                        Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    flex: 3,
+                                    child: TextFormField(
+                                      controller: urlController,
+                                      decoration: InputDecoration(
+                                        labelText: 'URL del Servidor',
+                                        hintText: 'http://ejemplo.com',
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                      ),
+                                      onChanged: (value) {
+                                        settings.setRpcUrl(value);
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    flex: 1,
+                                    child: TextFormField(
+                                      controller: puertoController,
+                                      decoration: InputDecoration(
+                                        labelText: 'Puerto',
+                                        hintText: '8069',
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                      ),
+                                      keyboardType: TextInputType.number,
+                                      onChanged: (value) {
+                                        settings.setRpcPuerto(value);
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller: usuarioController,
+                                      decoration: InputDecoration(
+                                        labelText: 'Usuario',
+                                        hintText: 'admin',
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                      ),
+                                      onChanged: (value) {
+                                        settings.setRpcUsuario(value);
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller: contrasenaController,
+                                      decoration: InputDecoration(
+                                        labelText: 'Contraseña',
+                                        hintText: '••••••••',
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                      ),
+                                      obscureText: true,
+                                      onChanged: (value) {
+                                        settings.setRpcContrasena(value);
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 24),
+                              Row(
+                                children: [
+                                  ElevatedButton.icon(
+                                    onPressed: isTesting ? null : () async {
+                                      setState(() {
+                                        isTesting = true;
+                                      });
+
+                                      // Simular prueba de conexión
+                                      await Future.delayed(const Duration(seconds: 2));
+
+                                      setState(() {
+                                        isTesting = false;
+                                      });
+
+                                      if (context.mounted) {
+                                        final hasData = settings.rpcUrl.isNotEmpty && 
+                                                       settings.rpcUsuario.isNotEmpty;
+                                        
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              hasData 
+                                                ? 'Conexión probada exitosamente' 
+                                                : 'Complete todos los campos para probar la conexión',
+                                            ),
+                                            backgroundColor: hasData ? Colors.green : Colors.orange,
+                                            duration: const Duration(seconds: 3),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                    icon: isTesting
+                                        ? const SizedBox(
+                                            width: 16,
+                                            height: 16,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                            ),
+                                          )
+                                        : const Icon(Icons.cloud_done, size: 18),
+                                    label: Text(isTesting ? 'Probando...' : 'Probar Conexión'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: settings.themeColor,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  if (settings.rpcUrl.isNotEmpty)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.shade50,
+                                        borderRadius: BorderRadius.circular(6),
+                                        border: Border.all(color: Colors.blue.shade200),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.info_outline, size: 16, color: Colors.blue.shade700),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            'Configuración guardada',
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              color: Colors.blue.shade900,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         );
       },

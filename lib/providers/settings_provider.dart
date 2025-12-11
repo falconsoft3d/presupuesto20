@@ -8,11 +8,33 @@ class SettingsProvider with ChangeNotifier {
   int? _companiaActualId;
   bool _registroHabilitado = true;
   
+  // Secuencias
+  String _secuenciaProyecto = 'PY';
+  int _proximoNumeroProyecto = 1;
+  String _secuenciaPresupuesto = 'PR';
+  int _proximoNumeroPresupuesto = 1;
+  
+  // Integración RPC
+  String _rpcUrl = '';
+  String _rpcPuerto = '8069';
+  String _rpcUsuario = '';
+  String _rpcContrasena = '';
+  
   Color get themeColor => _themeColor;
   String? get homeBackgroundPath => _homeBackgroundPath;
   String? get lockBackgroundPath => _lockBackgroundPath;
   int? get companiaActualId => _companiaActualId;
   bool get registroHabilitado => _registroHabilitado;
+  
+  String get secuenciaProyecto => _secuenciaProyecto;
+  int get proximoNumeroProyecto => _proximoNumeroProyecto;
+  String get secuenciaPresupuesto => _secuenciaPresupuesto;
+  int get proximoNumeroPresupuesto => _proximoNumeroPresupuesto;
+  
+  String get rpcUrl => _rpcUrl;
+  String get rpcPuerto => _rpcPuerto;
+  String get rpcUsuario => _rpcUsuario;
+  String get rpcContrasena => _rpcContrasena;
 
   SettingsProvider() {
     _loadSettings();
@@ -30,6 +52,18 @@ class SettingsProvider with ChangeNotifier {
       _lockBackgroundPath = prefs.getString('lockBackground');
       _companiaActualId = prefs.getInt('companiaActualId');
       _registroHabilitado = prefs.getBool('registroHabilitado') ?? true;
+      
+      // Cargar secuencias
+      _secuenciaProyecto = prefs.getString('secuenciaProyecto') ?? 'PY';
+      _proximoNumeroProyecto = prefs.getInt('proximoNumeroProyecto') ?? 1;
+      _secuenciaPresupuesto = prefs.getString('secuenciaPresupuesto') ?? 'PR';
+      _proximoNumeroPresupuesto = prefs.getInt('proximoNumeroPresupuesto') ?? 1;
+      
+      // Cargar integración RPC
+      _rpcUrl = prefs.getString('rpcUrl') ?? '';
+      _rpcPuerto = prefs.getString('rpcPuerto') ?? '8069';
+      _rpcUsuario = prefs.getString('rpcUsuario') ?? '';
+      _rpcContrasena = prefs.getString('rpcContrasena') ?? '';
       
       notifyListeners();
     } catch (e) {
@@ -106,6 +140,114 @@ class SettingsProvider with ChangeNotifier {
       await prefs.setBool('registroHabilitado', habilitado);
     } catch (e) {
       debugPrint('Error saving registro habilitado: $e');
+    }
+  }
+
+  Future<void> setSecuenciaProyecto(String secuencia) async {
+    _secuenciaProyecto = secuencia;
+    notifyListeners();
+    
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('secuenciaProyecto', secuencia);
+    } catch (e) {
+      debugPrint('Error saving secuencia proyecto: $e');
+    }
+  }
+
+  Future<void> setProximoNumeroProyecto(int numero) async {
+    _proximoNumeroProyecto = numero;
+    notifyListeners();
+    
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('proximoNumeroProyecto', numero);
+    } catch (e) {
+      debugPrint('Error saving proximo numero proyecto: $e');
+    }
+  }
+
+  Future<void> setSecuenciaPresupuesto(String secuencia) async {
+    _secuenciaPresupuesto = secuencia;
+    notifyListeners();
+    
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('secuenciaPresupuesto', secuencia);
+    } catch (e) {
+      debugPrint('Error saving secuencia presupuesto: $e');
+    }
+  }
+
+  Future<void> setProximoNumeroPresupuesto(int numero) async {
+    _proximoNumeroPresupuesto = numero;
+    notifyListeners();
+    
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('proximoNumeroPresupuesto', numero);
+    } catch (e) {
+      debugPrint('Error saving proximo numero presupuesto: $e');
+    }
+  }
+
+  String generarCodigoProyecto() {
+    final codigo = '$_secuenciaProyecto${_proximoNumeroProyecto.toString().padLeft(5, '0')}';
+    setProximoNumeroProyecto(_proximoNumeroProyecto + 1);
+    return codigo;
+  }
+
+  String generarCodigoPresupuesto() {
+    final codigo = '$_secuenciaPresupuesto${_proximoNumeroPresupuesto.toString().padLeft(5, '0')}';
+    setProximoNumeroPresupuesto(_proximoNumeroPresupuesto + 1);
+    return codigo;
+  }
+
+  Future<void> setRpcUrl(String url) async {
+    _rpcUrl = url;
+    notifyListeners();
+    
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('rpcUrl', url);
+    } catch (e) {
+      debugPrint('Error saving rpc url: $e');
+    }
+  }
+
+  Future<void> setRpcPuerto(String puerto) async {
+    _rpcPuerto = puerto;
+    notifyListeners();
+    
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('rpcPuerto', puerto);
+    } catch (e) {
+      debugPrint('Error saving rpc puerto: $e');
+    }
+  }
+
+  Future<void> setRpcUsuario(String usuario) async {
+    _rpcUsuario = usuario;
+    notifyListeners();
+    
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('rpcUsuario', usuario);
+    } catch (e) {
+      debugPrint('Error saving rpc usuario: $e');
+    }
+  }
+
+  Future<void> setRpcContrasena(String contrasena) async {
+    _rpcContrasena = contrasena;
+    notifyListeners();
+    
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('rpcContrasena', contrasena);
+    } catch (e) {
+      debugPrint('Error saving rpc contrasena: $e');
     }
   }
 }

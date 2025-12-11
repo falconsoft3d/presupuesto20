@@ -36,6 +36,7 @@ class CompaniasProvider with ChangeNotifier {
     String? telefono,
     String? email,
     String? logo,
+    int? monedaId,
     bool activa = true,
   }) async {
     try {
@@ -47,6 +48,7 @@ class CompaniasProvider with ChangeNotifier {
         telefono: Value(telefono),
         email: Value(email),
         logo: Value(logo),
+        monedaId: Value(monedaId),
         activa: Value(activa),
       );
 
@@ -68,27 +70,10 @@ class CompaniasProvider with ChangeNotifier {
     String? telefono,
     String? email,
     String? logo,
+    int? monedaId,
     required bool activa,
   }) async {
     try {
-      // Obtener la compañía actual
-      final companiaActual = getCompaniaById(id);
-      if (companiaActual == null) return false;
-
-      final compania = Compania(
-        id: id,
-        nombre: nombre,
-        razonSocial: razonSocial,
-        ruc: ruc,
-        direccion: direccion,
-        telefono: telefono,
-        email: email,
-        logo: logo,
-        activa: activa,
-        fechaCreacion: companiaActual.fechaCreacion,
-        fechaModificacion: DateTime.now(),
-      );
-
       await _database.updateCompania(CompaniasCompanion(
         id: Value(id),
         nombre: Value(nombre),
@@ -98,6 +83,7 @@ class CompaniasProvider with ChangeNotifier {
         telefono: Value(telefono),
         email: Value(email),
         logo: Value(logo),
+        monedaId: Value(monedaId),
         activa: Value(activa),
         fechaModificacion: Value(DateTime.now()),
       ));

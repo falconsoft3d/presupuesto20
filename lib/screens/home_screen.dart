@@ -15,6 +15,7 @@ import '../database/database.dart';
 import 'settings_screen.dart';
 import 'proyectos_screen.dart';
 import 'presupuestos_screen.dart';
+import 'conceptos_screen.dart';
 import 'productos_screen.dart';
 import 'empleados_screen.dart';
 import 'usuarios_screen.dart';
@@ -33,12 +34,20 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _selectedApp;
   Contacto? _selectedContacto;
   bool _isCreatingContacto = false;
+  String _appSearchQuery = '';
+  final TextEditingController _appSearchController = TextEditingController();
 
   void _showNewObraDialog() {
     showDialog(
       context: context,
       builder: (context) => const ObraFormDialog(),
     );
+  }
+
+  @override
+  void dispose() {
+    _appSearchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -84,6 +93,47 @@ class _HomeScreenState extends State<HomeScreen> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+                const SizedBox(width: 24),
+                // Buscador de apps
+                if (_selectedView == 'home')
+                  Expanded(
+                    child: Container(
+                      constraints: const BoxConstraints(maxWidth: 400),
+                      height: 36,
+                      child: TextField(
+                        controller: _appSearchController,
+                        onChanged: (value) {
+                          setState(() {
+                            _appSearchQuery = value.toLowerCase();
+                          });
+                        },
+                        style: const TextStyle(color: Colors.white, fontSize: 14),
+                        decoration: InputDecoration(
+                          hintText: 'Buscar aplicaciones...',
+                          hintStyle: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 14),
+                          prefixIcon: Icon(Icons.search, color: Colors.white.withOpacity(0.7), size: 20),
+                          suffixIcon: _appSearchQuery.isNotEmpty
+                              ? IconButton(
+                                  icon: Icon(Icons.clear, color: Colors.white.withOpacity(0.7), size: 18),
+                                  onPressed: () {
+                                    setState(() {
+                                      _appSearchController.clear();
+                                      _appSearchQuery = '';
+                                    });
+                                  },
+                                )
+                              : null,
+                          filled: true,
+                          fillColor: Colors.white.withOpacity(0.2),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(4),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        ),
+                      ),
+                    ),
+                  ),
                 const Spacer(),
                 // Configuración (solo administradores)
                 if (authProvider.isAdministrador)
@@ -281,6 +331,91 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildAppGrid() {
     return Consumer<SettingsProvider>(
       builder: (context, settings, child) {
+        // Definir todas las apps disponibles
+        final allApps = [
+          {'title': 'Proyectos', 'icon': Icons.account_tree, 'color': const Color(0xFF2ECC71), 'app': 'proyectos'},
+          {'title': 'Presupuestos', 'icon': Icons.description, 'color': const Color(0xFF8E44AD), 'app': 'presupuestos'},
+          {'title': 'Conceptos', 'icon': Icons.category, 'color': const Color(0xFF9B59B6), 'app': 'conceptos'},
+          {'title': 'Contactos', 'icon': Icons.contacts, 'color': const Color(0xFF00A09D), 'app': 'contactos'},
+          {'title': 'Productos', 'icon': Icons.inventory_2, 'color': const Color(0xFFE67E22), 'app': 'productos'},
+          {'title': 'Empleados', 'icon': Icons.badge, 'color': const Color(0xFF34495E), 'app': 'empleados'},
+          {'title': 'Datos', 'icon': Icons.data_object, 'color': const Color(0xFF16A085), 'app': 'datos_maestros', 'badge': 'ADMIN'},
+        ];
+        
+        // Apps administrativas
+        final isAdmin = context.read<AuthProvider>().isAdministrador;
+        if (isAdmin) {
+          allApps.addAll([
+            {'title': 'Usuarios', 'icon': Icons.people, 'color': const Color(0xFF9B59B6), 'app': 'usuarios', 'badge': 'ADMIN'},
+            {'title': 'Compañías', 'icon': Icons.business, 'color': const Color(0xFF3498DB), 'app': 'companias', 'badge': 'ADMIN'},
+          ]);
+        }
+        
+        // Filtrar apps según búsqueda
+        final filteredApps = _appSearchQuery.isEmpty
+            ? allApps
+            : allApps.where((app) {
+                final title = (app['title'] as String).toLowerCase();
+                return title.contains(_appSearchQuery);
+              }).toList();
+
+        return Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFF0F0F0),
+            image: settings.homeBackgroundPath != null && 
+                   File(settings.homeBackgroundPath!).existsSync()
+                ? DecorationImage(
+                    image: FileImage(File(settings.homeBackgroundPath!)),
+                    fit: BoxFit.cover,
+                    onError: (exception, stackTrace) {
+                      debugPrint('Error loading home background: $exception');
+                      settings.setHomeBackground(null);
+                    },
+                  )
+                : null,
+          ),
+          padding: const EdgeInsets.all(40),
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: filteredApps.isEmpty
+                ? Center(
+                    child: Text(
+                      'No se encontraron aplicaciones',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  )
+                : Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: filteredApps.map((app) {
+                      return _buildAppCard(
+                        title: app['title'] as String,
+                        icon: app['icon'] as IconData,
+                        color: app['color'] as Color,
+                        badge: app['badge'] as String?,
+                        onTap: () {
+                          setState(() {
+                            _selectedView = 'app';
+                            _selectedApp = app['app'] as String;
+                            _appSearchQuery = '';
+                            _appSearchController.clear();
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildAppGridOLD() {
+    return Consumer<SettingsProvider>(
+      builder: (context, settings, child) {
         return Container(
           decoration: BoxDecoration(
             color: const Color(0xFFF0F0F0),
@@ -439,7 +574,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   )
                 : _selectedApp == 'presupuestos'
                     ? const PresupuestosScreen()
-                    : _selectedApp == 'contactos'
+                    : _selectedApp == 'conceptos'
+                        ? ConceptosScreen(
+                            onBack: () {
+                              setState(() {
+                                _selectedView = 'home';
+                                _selectedApp = null;
+                              });
+                            },
+                          )
+                        : _selectedApp == 'contactos'
                 ? (_isCreatingContacto || _selectedContacto != null
                     ? ContactoFormView(
                         contacto: _selectedContacto,
@@ -568,7 +712,7 @@ class _AnimatedAppCardState extends State<_AnimatedAppCard> {
             width: 155,
             height: 140,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Colors.white.withOpacity(0.6),
               borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
@@ -580,39 +724,44 @@ class _AnimatedAppCardState extends State<_AnimatedAppCard> {
             ),
             child: Stack(
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: widget.color,
-                          borderRadius: BorderRadius.circular(8),
+                // Contenido principal centrado
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: widget.color,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            widget.icon,
+                            size: 26,
+                            color: Colors.white,
+                          ),
                         ),
-                        child: Icon(
-                          widget.icon,
-                          size: 26,
-                          color: Colors.white,
+                        const SizedBox(height: 10),
+                        Text(
+                          widget.title,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF2C2C2C),
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        widget.title,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF2C2C2C),
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
+                // Badge posicionado absolutamente
                 if (widget.badge != null)
                   Positioned(
                     top: 6,

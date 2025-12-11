@@ -27,15 +27,32 @@ class _PresupuestoFormViewState extends State<PresupuestoFormView> {
   late TextEditingController _nombreController;
   int? _selectedCompaniaId;
   int? _selectedMonedaId;
+  int? _selectedEstadoId;
+  String _selectedTipoCalculo = 'Estandar';
   bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
-    _codigoController = TextEditingController(text: widget.presupuesto?.codigo ?? '');
+    // Si es un nuevo presupuesto, generar código automáticamente
+    final isEditing = widget.presupuesto != null;
+    
+    _codigoController = TextEditingController(
+      text: isEditing ? widget.presupuesto!.codigo : ''
+    );
     _nombreController = TextEditingController(text: widget.presupuesto?.nombre ?? '');
     _selectedCompaniaId = widget.presupuesto?.companiaId;
     _selectedMonedaId = widget.presupuesto?.monedaId;
+    _selectedEstadoId = widget.presupuesto?.estadoId;
+    _selectedTipoCalculo = widget.presupuesto?.tipoCalculo ?? 'Estandar';
+    
+    // Generar código después de que el contexto esté disponible
+    if (!isEditing) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final settingsProvider = context.read<SettingsProvider>();
+        _codigoController.text = settingsProvider.generarCodigoPresupuesto();
+      });
+    }
   }
 
   @override
@@ -47,11 +64,10 @@ class _PresupuestoFormViewState extends State<PresupuestoFormView> {
 
   @override
   Widget build(BuildContext context) {
-    final isEditing = widget.presupuesto != null;
     final settings = context.watch<SettingsProvider>();
 
-    return Consumer2<CompaniasProvider, MonedasProvider>(
-      builder: (context, companiasProvider, monedasProvider, child) {
+    return Consumer3<CompaniasProvider, MonedasProvider, EstadosProvider>(
+      builder: (context, companiasProvider, monedasProvider, estadosProvider, child) {
         return Column(
           children: [
             // Toolbar
@@ -240,6 +256,62 @@ class _PresupuestoFormViewState extends State<PresupuestoFormView> {
                                   ),
                                 ],
                               ),
+                              const SizedBox(height: 16),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: DropdownButtonFormField<int?>(
+                                      value: _selectedEstadoId,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Estado',
+                                        border: OutlineInputBorder(),
+                                      ),
+                                      items: [
+                                        const DropdownMenuItem<int?>(
+                                          value: null,
+                                          child: Text('Seleccionar estado...'),
+                                        ),
+                                        ...estadosProvider.estados.map((estado) {
+                                          return DropdownMenuItem<int?>(
+                                            value: estado.id,
+                                            child: Text(estado.nombre),
+                                          );
+                                        }),
+                                      ],
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _selectedEstadoId = value;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: DropdownButtonFormField<String>(
+                                      value: _selectedTipoCalculo,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Tipo de Cálculo',
+                                        border: OutlineInputBorder(),
+                                      ),
+                                      items: const [
+                                        DropdownMenuItem<String>(
+                                          value: 'Estandar',
+                                          child: Text('Estándar'),
+                                        ),
+                                        DropdownMenuItem<String>(
+                                          value: 'Apu',
+                                          child: Text('APU'),
+                                        ),
+                                      ],
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _selectedTipoCalculo = value!;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                         ),
@@ -272,6 +344,8 @@ class _PresupuestoFormViewState extends State<PresupuestoFormView> {
           nombre: _nombreController.text,
           companiaId: _selectedCompaniaId,
           monedaId: _selectedMonedaId,
+          estadoId: _selectedEstadoId,
+          tipoCalculo: _selectedTipoCalculo,
         );
       } else {
         await presupuestosProvider.createPresupuesto(
@@ -279,6 +353,8 @@ class _PresupuestoFormViewState extends State<PresupuestoFormView> {
           nombre: _nombreController.text,
           companiaId: _selectedCompaniaId,
           monedaId: _selectedMonedaId,
+          estadoId: _selectedEstadoId,
+          tipoCalculo: _selectedTipoCalculo,
         );
       }
 

@@ -17,6 +17,7 @@ import 'providers/categorias_productos_provider.dart';
 import 'providers/estados_provider.dart';
 import 'providers/empleados_provider.dart';
 import 'providers/presupuestos_provider.dart';
+import 'providers/conceptos_provider.dart';
 import 'providers/settings_provider.dart';
 import 'providers/auth_provider.dart';
 
@@ -68,6 +69,10 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProxyProvider<AppDatabase, PresupuestosProvider>(
           create: (context) => PresupuestosProvider(context.read<AppDatabase>()),
           update: (context, db, previous) => previous ?? PresupuestosProvider(db),
+        ),
+        ChangeNotifierProxyProvider<AppDatabase, ConceptosProvider>(
+          create: (context) => ConceptosProvider(context.read<AppDatabase>()),
+          update: (context, db, previous) => previous ?? ConceptosProvider(db),
         ),
         ChangeNotifierProxyProvider<AppDatabase, ContactosProvider>(
           create: (context) => ContactosProvider(context.read<AppDatabase>()),

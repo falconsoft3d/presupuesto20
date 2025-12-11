@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/presupuestos_provider.dart';
 import '../providers/companias_provider.dart';
 import '../providers/monedas_provider.dart';
+import '../providers/estados_provider.dart';
 import '../database/database.dart';
 import '../widgets/common/generic_list_view.dart';
 
@@ -18,8 +19,8 @@ class PresupuestosList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<PresupuestosProvider, CompaniasProvider, MonedasProvider>(
-      builder: (context, presupuestosProvider, companiasProvider, monedasProvider, child) {
+    return Consumer4<PresupuestosProvider, CompaniasProvider, MonedasProvider, EstadosProvider>(
+      builder: (context, presupuestosProvider, companiasProvider, monedasProvider, estadosProvider, child) {
         if (presupuestosProvider.isLoading) {
           return const Center(
             child: CircularProgressIndicator(),
@@ -55,6 +56,15 @@ class PresupuestosList extends StatelessWidget {
                 if (presupuesto.monedaId == null) return '-';
                 final moneda = monedasProvider.getMonedaById(presupuesto.monedaId!);
                 return moneda?.nombre ?? '-';
+              },
+            ),
+            ColumnConfig(
+              label: 'Estado',
+              width: 150,
+              getValue: (presupuesto) {
+                if (presupuesto.estadoId == null) return '-';
+                final estado = estadosProvider.getEstadoById(presupuesto.estadoId!);
+                return estado?.nombre ?? '-';
               },
             ),
           ],
