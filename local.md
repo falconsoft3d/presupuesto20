@@ -8,7 +8,7 @@ flutter run -d macos
 flutter run -d chrome
 ```
 
-# Ejecutar en Windows
+# Ejecutar en Windows-64
 ```
 dart run build_runner build --delete-conflicting-outputs
 ```
