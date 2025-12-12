@@ -28,6 +28,7 @@ class _ConceptoFormViewState extends State<ConceptoFormView> {
   late TextEditingController _cantidadController;
   late TextEditingController _costeController;
   late TextEditingController _importeController;
+  late TextEditingController _rendimientoController;
   
   int? _selectedProductoId;
   int? _selectedPadreId;
@@ -58,6 +59,9 @@ class _ConceptoFormViewState extends State<ConceptoFormView> {
     _importeController = TextEditingController(
       text: widget.concepto?.importe.toString() ?? '0',
     );
+    _rendimientoController = TextEditingController(
+      text: widget.concepto?.rendimiento.toString() ?? '0',
+    );
     
     if (widget.concepto != null) {
       _selectedProductoId = widget.concepto!.productoId;
@@ -74,6 +78,7 @@ class _ConceptoFormViewState extends State<ConceptoFormView> {
     _cantidadController.dispose();
     _costeController.dispose();
     _importeController.dispose();
+    _rendimientoController.dispose();
     super.dispose();
   }
 
@@ -94,6 +99,7 @@ class _ConceptoFormViewState extends State<ConceptoFormView> {
           cantidad: double.tryParse(_cantidadController.text) ?? 0.0,
           coste: double.tryParse(_costeController.text) ?? 0.0,
           importe: double.tryParse(_importeController.text) ?? 0.0,
+          rendimiento: double.tryParse(_rendimientoController.text) ?? 0.0,
           productoId: _selectedProductoId,
           padreId: _selectedPadreId,
           presupuestoId: _selectedPresupuestoId,
@@ -107,6 +113,7 @@ class _ConceptoFormViewState extends State<ConceptoFormView> {
           cantidad: double.tryParse(_cantidadController.text) ?? 0.0,
           coste: double.tryParse(_costeController.text) ?? 0.0,
           importe: double.tryParse(_importeController.text) ?? 0.0,
+          rendimiento: double.tryParse(_rendimientoController.text) ?? 0.0,
           productoId: _selectedProductoId,
           padreId: _selectedPadreId,
           presupuestoId: _selectedPresupuestoId,
@@ -311,6 +318,22 @@ class _ConceptoFormViewState extends State<ConceptoFormView> {
                                   keyboardType: TextInputType.number,
                                 ),
                               ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextFormField(
+                                  controller: _rendimientoController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Rendimiento',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  keyboardType: TextInputType.number,
+                                ),
+                              ),
+                              const Expanded(flex: 2, child: SizedBox()),
                             ],
                           ),
                         ],

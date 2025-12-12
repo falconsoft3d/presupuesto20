@@ -56,7 +56,7 @@ class _GenericListViewState<T> extends State<GenericListView<T>> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   final Set<int> _selectedIndices = {};
-  bool _selectAll = false;
+
 
   @override
   void dispose() {
@@ -319,7 +319,6 @@ class _GenericListViewState<T> extends State<GenericListView<T>> {
                         } else {
                           _selectedIndices.remove(index);
                         }
-                        _selectAll = _selectedIndices.length == _filteredItems.length;
                       });
                     },
                   ),
@@ -419,7 +418,7 @@ class _GenericListViewState<T> extends State<GenericListView<T>> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              widget.onDelete(item);
+              widget.onDelete!(item);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,

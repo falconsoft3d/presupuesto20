@@ -754,6 +754,7 @@ class _ConceptosTreeScreenState extends State<ConceptosTreeScreen> {
         cantidad: newCantidad,
         coste: newCoste,
         importe: newImporte,
+        rendimiento: concepto.rendimiento,
         productoId: concepto.productoId,
         padreId: concepto.padreId,
         presupuestoId: concepto.presupuestoId,
@@ -1477,6 +1478,20 @@ class _ConceptosTreeScreenState extends State<ConceptosTreeScreen> {
                                   color: Colors.grey.shade800,
                                 ),
                               ),
+                              const Spacer(),
+                              IconButton(
+                                icon: const Icon(Icons.add_circle_outline, size: 20),
+                                onPressed: () {
+                                  setState(() {
+                                    _selectedConcepto = null;
+                                    _forceShowForm = true;
+                                  });
+                                },
+                                tooltip: 'Agregar concepto',
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                              ),
+                              const SizedBox(width: 8),
                             ],
                           ),
                         ),

@@ -150,6 +150,7 @@ class Conceptos extends Table {
   IntColumn get padreId => integer().nullable().references(Conceptos, #id)();
   IntColumn get presupuestoId => integer().nullable().references(Presupuestos, #id)();
   TextColumn get tipoRecurso => text().withLength(min: 1, max: 100)(); // Material, Servicio, Mano de obra, etc.
+  RealColumn get rendimiento => real().withDefault(const Constant(0.0))();
   DateTimeColumn get fechaCreacion => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get fechaModificacion => dateTime().withDefault(currentDateAndTime)();
 }

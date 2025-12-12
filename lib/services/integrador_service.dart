@@ -277,6 +277,7 @@ class IntegradorService {
       final medicion = _getCellValueDouble(row, 4); // Columna E
       final precio = _getCellValueDouble(row, 5);   // Columna F
       final importe = _getCellValueDouble(row, 6);  // Columna G
+      final rendimiento = _getCellValueDouble(row, 7); // Columna H
       
       // Debug: mostrar lo que se está leyendo
       print('Fila $i: codigo="$codigo" nat="$nat" desc="$descripcion" med=$medicion precio=$precio');
@@ -374,6 +375,7 @@ class IntegradorService {
           medicion: medicion,
           precio: precio,
           importe: importe,
+          rendimiento: rendimiento,
         );
         recursosCount++;
       } else if (nat.isNotEmpty && partidaActualId == null) {
@@ -442,6 +444,7 @@ class IntegradorService {
     required double medicion,
     required double precio,
     required double importe,
+    required double rendimiento,
   }) async {
     // Mapear tipo NAT a tipoRecurso
     String tipoRecurso;
@@ -462,6 +465,14 @@ class IntegradorService {
         tipoRecurso = 'Otros';
     }
     
+    // Buscar o crear el producto
+    final productoId = await _buscarOCrearProducto(
+      codigo: codigo,
+      nombre: descripcion,
+      tipoRecurso: tipoRecurso,
+      precio: precio,
+    );
+    
     return await _database.insertConcepto(
       ConceptosCompanion.insert(
         codigo: codigo,
@@ -470,8 +481,10 @@ class IntegradorService {
         cantidad: drift.Value(medicion),
         coste: drift.Value(precio),
         importe: drift.Value(importe),
+        rendimiento: drift.Value(rendimiento),
         presupuestoId: drift.Value(presupuestoId),
         padreId: drift.Value(partidaId),
+        productoId: drift.Value(productoId), // Asociar el producto
       ),
     );
   }
@@ -524,6 +537,37 @@ class IntegradorService {
       print('Error parseando celda en índice $index: $e');
       return 0.0;
     }
+  }
+
+  /// Busca un producto por código, si no existe lo crea
+  Future<int> _buscarOCrearProducto({
+    required String codigo,
+    required String nombre,
+    required String tipoRecurso,
+    required double precio,
+  }) async {
+    // Buscar producto existente por código
+    final productoExistente = await (_database.select(_database.productos)
+          ..where((p) => p.codigo.equals(codigo)))
+        .getSingleOrNull();
+
+    if (productoExistente != null) {
+      print('   ✓ Producto encontrado: ${productoExistente.codigo} - ${productoExistente.nombre}');
+      return productoExistente.id;
+    }
+
+    // Si no existe, crear el producto
+    print('   ✓ Creando producto: $codigo - $nombre (tipo: $tipoRecurso)');
+    
+    return await _database.insertProducto(
+      ProductosCompanion.insert(
+        codigo: codigo,
+        nombre: nombre,
+        tipo: tipoRecurso,
+        precio: drift.Value(precio),
+        coste: drift.Value(precio),
+      ),
+    );
   }
 
   /// Calcula totales de forma recursiva de abajo hacia arriba
