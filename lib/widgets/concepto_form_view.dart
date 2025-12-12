@@ -370,13 +370,15 @@ class _ConceptoFormViewState extends State<ConceptoFormView> {
                                       ),
                                       items: [
                                         const DropdownMenuItem<int?>(
+                                          key: ValueKey('producto-null'),
                                           value: null,
                                           child: Text('Sin producto'),
                                         ),
                                         ...productosProvider.productos.map((producto) {
                                           return DropdownMenuItem<int?>(
+                                            key: ValueKey('producto-${producto.id}'),
                                             value: producto.id,
-                                            child: Text(producto.nombre),
+                                            child: Text('${producto.codigo} - ${producto.nombre}'),
                                           );
                                         }),
                                       ],
@@ -401,13 +403,15 @@ class _ConceptoFormViewState extends State<ConceptoFormView> {
                                       ),
                                       items: [
                                         const DropdownMenuItem<int?>(
+                                          key: ValueKey('presupuesto-null'),
                                           value: null,
                                           child: Text('Sin presupuesto'),
                                         ),
                                         ...presupuestosProvider.presupuestos.map((presupuesto) {
                                           return DropdownMenuItem<int?>(
+                                            key: ValueKey('presupuesto-${presupuesto.id}'),
                                             value: presupuesto.id,
-                                            child: Text(presupuesto.nombre),
+                                            child: Text('${presupuesto.codigo} - ${presupuesto.nombre}'),
                                           );
                                         }),
                                       ],
@@ -433,6 +437,7 @@ class _ConceptoFormViewState extends State<ConceptoFormView> {
                                 ),
                                 items: [
                                   const DropdownMenuItem<int?>(
+                                    key: ValueKey('concepto-padre-null'),
                                     value: null,
                                     child: Text('Sin concepto padre'),
                                   ),
@@ -440,8 +445,9 @@ class _ConceptoFormViewState extends State<ConceptoFormView> {
                                       .where((c) => c.id != widget.concepto?.id)
                                       .map((concepto) {
                                     return DropdownMenuItem<int?>(
+                                      key: ValueKey('concepto-padre-${concepto.id}'),
                                       value: concepto.id,
-                                      child: Text(concepto.nombre),
+                                      child: Text('${concepto.codigo} - ${concepto.nombre}'),
                                     );
                                   }),
                                 ],

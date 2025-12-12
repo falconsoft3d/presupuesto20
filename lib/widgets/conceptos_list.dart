@@ -98,11 +98,7 @@ class ConceptosList extends StatelessWidget {
           emptyIcon: 'category',
           emptyMessage: 'No hay conceptos registrados',
           onItemSelected: onConceptoSelected,
-          onEdit: onConceptoSelected,
-          onDelete: (concepto) async {
-            await Provider.of<ConceptosProvider>(context, listen: false)
-                .deleteConcepto(concepto.id);
-          },
+          // onEdit y onDelete omitidos para ocultar los botones
           onCreate: onCreateNew,
           getSearchableFields: (concepto) => [
             concepto.codigo,

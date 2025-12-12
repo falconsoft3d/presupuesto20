@@ -4,8 +4,10 @@ import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import '../providers/integradores_provider.dart';
 import '../providers/settings_provider.dart';
+import '../providers/presupuestos_provider.dart';
 import '../database/database.dart';
 import '../services/integrador_service.dart';
+import '../screens/conceptos_tree_screen.dart';
 
 class IntegradorFormView extends StatefulWidget {
   final Integrador? integrador;
@@ -93,12 +95,17 @@ class _IntegradorFormViewState extends State<IntegradorFormView> {
 
     try {
       final integradoresProvider = context.read<IntegradoresProvider>();
+      final presupuestosProvider = context.read<PresupuestosProvider>();
       
-      // Aquí se procesaría el archivo según el tipo
+      // Procesar el archivo según el tipo
+      int? presupuestoId;
       String resultado = '';
+      
       switch (_selectedTipo) {
         case '2000':
-          resultado = await _procesarArchivo2000(_rutaArchivo!);
+          final result = await _procesarArchivo2000Completo(_rutaArchivo!);
+          presupuestoId = result['presupuestoId'];
+          resultado = result['mensaje'];
           break;
         case 'bc3':
           resultado = await _procesarArchivoBc3(_rutaArchivo!);
@@ -118,7 +125,27 @@ class _IntegradorFormViewState extends State<IntegradorFormView> {
             backgroundColor: Colors.green,
           ),
         );
-        widget.onBack();
+        
+        // Si se creó un presupuesto, navegar a él
+        if (presupuestoId != null) {
+          await presupuestosProvider.loadPresupuestos();
+          final presupuesto = presupuestosProvider.getPresupuestoById(presupuestoId);
+          
+          if (presupuesto != null && mounted) {
+            widget.onBack();
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => ConceptosTreeScreen(
+                  presupuesto: presupuesto,
+                ),
+              ),
+            );
+          } else {
+            widget.onBack();
+          }
+        } else {
+          widget.onBack();
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -184,7 +211,7 @@ class _IntegradorFormViewState extends State<IntegradorFormView> {
     }
   }
 
-  Future<String> _procesarArchivo2000(String ruta) async {
+  Future<Map<String, dynamic>> _procesarArchivo2000Completo(String ruta) async {
     final database = context.read<AppDatabase>();
     final service = IntegradorService(database);
     
@@ -198,10 +225,13 @@ class _IntegradorFormViewState extends State<IntegradorFormView> {
     );
     
     if (resultado['success'] == true) {
-      return 'Presupuesto creado: ${resultado['presupuestoId']}\n'
-             'Capítulos: ${resultado['capitulos']}\n'
-             'Partidas: ${resultado['partidas']}\n'
-             'Recursos: ${resultado['recursos']}';
+      return {
+        'presupuestoId': resultado['presupuestoId'],
+        'mensaje': 'Presupuesto creado: ${resultado['presupuestoId']}\n'
+                   'Capítulos: ${resultado['capitulos']}\n'
+                   'Partidas: ${resultado['partidas']}\n'
+                   'Recursos: ${resultado['recursos']}',
+      };
     } else {
       throw Exception(resultado['message']);
     }
@@ -215,6 +245,110 @@ class _IntegradorFormViewState extends State<IntegradorFormView> {
     final tamano = await file.length();
     
     return 'Archivo BC3 procesado. Tamaño: ${(tamano / 1024).toStringAsFixed(2)} KB\n(Procesamiento BC3 pendiente de implementar)';
+  }
+
+  Future<void> _guardarYProcesar() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    if (_rutaArchivo == null || _nombreArchivo == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Debe seleccionar un archivo'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isSaving = true);
+
+    final integradoresProvider = context.read<IntegradoresProvider>();
+    final settingsProvider = context.read<SettingsProvider>();
+    final presupuestosProvider = context.read<PresupuestosProvider>();
+
+    try {
+      // Paso 1: Guardar el integrador
+      if (widget.integrador != null) {
+        await integradoresProvider.updateIntegrador(
+          id: widget.integrador!.id,
+          secuencia: _secuenciaController.text,
+          tipo: _selectedTipo,
+          nombreArchivo: _nombreArchivo!,
+          rutaArchivo: _rutaArchivo!,
+        );
+      } else {
+        await integradoresProvider.createIntegrador(
+          secuencia: _secuenciaController.text,
+          tipo: _selectedTipo,
+          nombreArchivo: _nombreArchivo!,
+          rutaArchivo: _rutaArchivo!,
+        );
+        
+        // Incrementar contador
+        await settingsProvider.incrementarContadorIntegrador();
+      }
+
+      // Paso 2: Procesar el archivo inmediatamente
+      int? presupuestoId;
+      String resultado = '';
+      
+      switch (_selectedTipo) {
+        case '2000':
+          final result = await _procesarArchivo2000Completo(_rutaArchivo!);
+          presupuestoId = result['presupuestoId'];
+          resultado = result['mensaje'];
+          break;
+        case 'bc3':
+          resultado = await _procesarArchivoBc3(_rutaArchivo!);
+          break;
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Guardado y procesado: $resultado'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+        
+        // Si se creó un presupuesto, navegar a él
+        if (presupuestoId != null) {
+          // Recargar presupuestos para obtener el nuevo
+          await presupuestosProvider.loadPresupuestos();
+          final presupuesto = presupuestosProvider.getPresupuestoById(presupuestoId);
+          
+          if (presupuesto != null && mounted) {
+            // Primero volver atrás
+            widget.onBack();
+            // Luego navegar al presupuesto
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => ConceptosTreeScreen(
+                  presupuesto: presupuesto,
+                ),
+              ),
+            );
+          } else {
+            widget.onBack();
+          }
+        } else {
+          widget.onBack();
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isSaving = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _saveIntegrador() async {
@@ -329,6 +463,26 @@ class _IntegradorFormViewState extends State<IntegradorFormView> {
                 ),
                 const SizedBox(width: 8),
               ],
+              ElevatedButton.icon(
+                onPressed: _isSaving ? null : _guardarYProcesar,
+                icon: _isSaving
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Icon(Icons.upload_file, size: 18),
+                label: const Text('Guardar y Procesar'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                ),
+              ),
+              const SizedBox(width: 8),
               ElevatedButton.icon(
                 onPressed: _isSaving ? null : _saveIntegrador,
                 icon: const Icon(Icons.save, size: 18),

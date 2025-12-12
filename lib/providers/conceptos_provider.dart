@@ -112,4 +112,87 @@ class ConceptosProvider with ChangeNotifier {
       rethrow;
     }
   }
+
+  /// Recalcula totales de un presupuesto de forma recursiva
+  Future<void> recalcularTotales(int presupuestoId) async {
+    try {
+      // Obtener todos los conceptos del presupuesto ordenados por nivel (más profundo primero)
+      final conceptos = await (database.select(database.conceptos)
+            ..where((c) => c.presupuestoId.equals(presupuestoId))
+            ..orderBy([
+              (c) => OrderingTerm(
+                    expression: c.id,
+                    mode: OrderingMode.desc,
+                  ),
+            ]))
+          .get();
+
+      // Set para rastrear qué conceptos ya fueron actualizados
+      final Set<int> procesados = {};
+
+      // Procesar cada concepto
+      for (final concepto in conceptos) {
+        if (procesados.contains(concepto.id)) continue;
+        await _calcularConcepto(concepto, procesados);
+      }
+
+      // Recargar conceptos después del cálculo
+      await loadConceptos();
+    } catch (e) {
+      debugPrint('Error recalculando totales: $e');
+      rethrow;
+    }
+  }
+
+  /// Calcula el total de un concepto y propaga hacia arriba
+  Future<void> _calcularConcepto(
+    Concepto concepto,
+    Set<int> procesados,
+  ) async {
+    // Si ya fue procesado, saltar
+    if (procesados.contains(concepto.id)) return;
+
+    // Primero calcular todos los hijos
+    final hijos = await (database.select(database.conceptos)
+          ..where((c) => c.padreId.equals(concepto.id)))
+        .get();
+
+    // Calcular recursivamente los hijos primero
+    for (final hijo in hijos) {
+      await _calcularConcepto(hijo, procesados);
+    }
+
+    // Ahora calcular este concepto
+    double nuevoCoste = 0.0;
+    double nuevoImporte = 0.0;
+
+    if (hijos.isEmpty) {
+      // Concepto hoja (recurso): importe = cantidad × coste
+      nuevoImporte = concepto.cantidad * concepto.coste;
+      nuevoCoste = concepto.coste;
+    } else {
+      // Concepto padre (partida/capítulo): sumar importes de hijos
+      for (final hijo in hijos) {
+        nuevoImporte += hijo.importe;
+      }
+      
+      // Para partidas y capítulos, el coste es igual al importe
+      nuevoCoste = nuevoImporte;
+    }
+
+    // Actualizar si cambió
+    if (nuevoCoste != concepto.coste || nuevoImporte != concepto.importe) {
+      await (database.update(database.conceptos)
+            ..where((c) => c.id.equals(concepto.id)))
+          .write(
+        ConceptosCompanion(
+          coste: Value(nuevoCoste),
+          importe: Value(nuevoImporte),
+        ),
+      );
+    }
+
+    // Marcar como procesado
+    procesados.add(concepto.id);
+  }
 }

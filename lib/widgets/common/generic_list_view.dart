@@ -25,8 +25,8 @@ class GenericListView<T> extends StatefulWidget {
   final String emptyIcon;
   final String emptyMessage;
   final Function(T) onItemSelected;
-  final Function(T) onEdit;
-  final Function(T) onDelete;
+  final Function(T)? onEdit;
+  final Function(T)? onDelete;
   final VoidCallback onCreate;
   final List<String> Function(T)? getSearchableFields;
   final bool showImportButton;
@@ -40,8 +40,8 @@ class GenericListView<T> extends StatefulWidget {
     required this.emptyIcon,
     required this.emptyMessage,
     required this.onItemSelected,
-    required this.onEdit,
-    required this.onDelete,
+    this.onEdit,
+    this.onDelete,
     required this.onCreate,
     this.getSearchableFields,
     this.showImportButton = false,
@@ -342,21 +342,24 @@ class _GenericListViewState<T> extends State<GenericListView<T>> {
                           padding: const EdgeInsets.only(right: 8),
                           child: action,
                         )),
-                      IconButton(
-                        icon: const Icon(Icons.edit, size: 18),
-                        onPressed: () => widget.onEdit(item),
-                        tooltip: 'Editar',
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        icon: const Icon(Icons.delete, size: 18),
-                        onPressed: () => _confirmDelete(item),
-                        tooltip: 'Eliminar',
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
+                      if (widget.onEdit != null) ...[
+                        IconButton(
+                          icon: const Icon(Icons.edit, size: 18),
+                          onPressed: () => widget.onEdit!(item),
+                          tooltip: 'Editar',
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      if (widget.onDelete != null)
+                        IconButton(
+                          icon: const Icon(Icons.delete, size: 18),
+                          onPressed: () => _confirmDelete(item),
+                          tooltip: 'Eliminar',
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
                     ],
                   ),
                 ),

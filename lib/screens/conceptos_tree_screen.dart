@@ -4,6 +4,7 @@ import 'package:drift/drift.dart' as drift;
 import '../database/database.dart';
 import '../providers/settings_provider.dart';
 import '../providers/monedas_provider.dart';
+import '../providers/conceptos_provider.dart';
 import '../widgets/concepto_form_view.dart';
 
 class ConceptosTreeScreen extends StatefulWidget {
@@ -56,6 +57,39 @@ class _ConceptosTreeScreenState extends State<ConceptosTreeScreen> {
     } catch (e) {
       print('Error cargando conceptos: $e');
       setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _recalcularTotales() async {
+    setState(() => _isLoading = true);
+    try {
+      final conceptosProvider = context.read<ConceptosProvider>();
+      await conceptosProvider.recalcularTotales(widget.presupuesto.id);
+      await _loadConceptos();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Totales recalculados correctamente'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error recalculando totales: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al recalcular: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -1293,6 +1327,14 @@ class _ConceptosTreeScreenState extends State<ConceptosTreeScreen> {
         title: Text('Conceptos - ${widget.presupuesto.nombre}'),
         backgroundColor: settings.themeColor,
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.calculate),
+            tooltip: 'Recalcular Totales',
+            onPressed: _isLoading ? null : _recalcularTotales,
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())

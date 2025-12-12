@@ -7,7 +7,6 @@ import '../providers/estados_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/conceptos_provider.dart';
 import '../database/database.dart';
-import '../screens/conceptos_screen.dart';
 import '../screens/conceptos_tree_screen.dart';
 
 class PresupuestoFormView extends StatefulWidget {
@@ -113,6 +112,29 @@ class _PresupuestoFormViewState extends State<PresupuestoFormView> {
                     ),
                   ),
                   if (widget.presupuesto != null) ...[
+                    const SizedBox(width: 8),
+                    ElevatedButton.icon(
+                      onPressed: _isSaving ? null : _recalcularTotales,
+                      icon: _isSaving
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Icon(Icons.calculate, size: 18),
+                      label: const Text('Calcular'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green.shade600,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ),
                     const SizedBox(width: 8),
                     ElevatedButton.icon(
                       onPressed: _openConceptosTree,
@@ -392,6 +414,40 @@ class _PresupuestoFormViewState extends State<PresupuestoFormView> {
             backgroundColor: Colors.red,
           ),
         );
+      }
+    }
+  }
+
+  Future<void> _recalcularTotales() async {
+    if (widget.presupuesto == null) return;
+
+    setState(() => _isSaving = true);
+
+    try {
+      final conceptosProvider = context.read<ConceptosProvider>();
+      await conceptosProvider.recalcularTotales(widget.presupuesto!.id);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Totales recalculados correctamente'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al recalcular: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
       }
     }
   }
