@@ -32,6 +32,10 @@ dependencies:
   intl: ^0.18.1
   crypto: ^3.0.3
   file_picker: ^6.1.1
+  http: ^1.1.0
+  excel: ^4.0.6
+  csv: ^6.0.0
+  archive: ^3.4.10
 
 dev_dependencies:
   flutter_test:
@@ -41,9 +45,24 @@ dev_dependencies:
   # Drift Code Generation
   drift_dev: ^2.14.0
   build_runner: ^2.4.7
+  
+  # Icon Generator
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
   
   # assets:
   #   - images/
+
+flutter_launcher_icons:
+  android: false
+  ios: false
+  image_path: "icon.png"
+  windows:
+    generate: true
+    image_path: "icon.png"
+    icon_size: 48
+  macos:
+    generate: true
+    image_path: "icon.png"

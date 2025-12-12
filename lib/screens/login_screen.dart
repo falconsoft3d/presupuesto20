@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
+import 'pin_login_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -36,8 +37,11 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     final authProvider = context.read<AuthProvider>();
+    final settingsProvider = context.read<SettingsProvider>();
+    final email = _emailController.text.trim();
+    
     final success = await authProvider.login(
-      email: _emailController.text.trim(),
+      email: email,
       password: _passwordController.text,
     );
 
@@ -46,7 +50,10 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = false;
       });
 
-      if (!success) {
+      if (success) {
+        // Guardar el email del usuario para login con PIN
+        await settingsProvider.setUltimoEmailUsuario(email);
+      } else {
         setState(() {
           _errorMessage = 'Email o contraseña incorrectos';
         });
@@ -63,7 +70,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final themeColor = context.watch<SettingsProvider>().themeColor;
+    final settings = context.watch<SettingsProvider>();
+    final themeColor = settings.themeColor;
+    
+    // Si el PIN está activado y configurado, mostrar la pantalla de PIN
+    if (settings.usarPin && settings.pinCode.isNotEmpty) {
+      return const PinLoginScreen();
+    }
     
     return Scaffold(
       backgroundColor: Colors.grey.shade100,

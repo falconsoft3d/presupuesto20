@@ -110,6 +110,13 @@ class AuthProvider with ChangeNotifier {
       return false;
     }
 
+    // Si password está vacío, es desbloqueo por PIN (ya verificado)
+    if (password.isEmpty) {
+      _isLocked = false;
+      notifyListeners();
+      return true;
+    }
+
     final hashedPassword = _hashPassword(password);
     
     if (_currentUser!.password != hashedPassword) {
@@ -119,6 +126,31 @@ class AuthProvider with ChangeNotifier {
     _isLocked = false;
     notifyListeners();
     return true;
+  }
+
+  Future<bool> loginWithEmail(String email) async {
+    try {
+      final usuario = await _database.getUsuarioByEmail(email);
+      
+      if (usuario == null) {
+        return false;
+      }
+
+      // Actualizar último acceso
+      final updatedUser = usuario.copyWith(
+        ultimoAcceso: drift.Value(DateTime.now()),
+      );
+      await _database.updateUsuario(updatedUser);
+
+      _currentUser = updatedUser;
+      _isAuthenticated = true;
+      notifyListeners();
+      
+      return true;
+    } catch (e) {
+      debugPrint('Error en login con email: $e');
+      return false;
+    }
   }
 
   Future<void> changePassword(int userId, String newHashedPassword) async {

@@ -30,6 +30,7 @@ class GenericListView<T> extends StatefulWidget {
   final VoidCallback onCreate;
   final List<String> Function(T)? getSearchableFields;
   final bool showImportButton;
+  final List<Widget> Function(T)? customActions;
 
   const GenericListView({
     super.key,
@@ -44,6 +45,7 @@ class GenericListView<T> extends StatefulWidget {
     required this.onCreate,
     this.getSearchableFields,
     this.showImportButton = false,
+    this.customActions,
   });
 
   @override
@@ -335,6 +337,11 @@ class _GenericListViewState<T> extends State<GenericListView<T>> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      if (widget.customActions != null)
+                        ...widget.customActions!(item).map((action) => Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: action,
+                        )),
                       IconButton(
                         icon: const Icon(Icons.edit, size: 18),
                         onPressed: () => widget.onEdit(item),

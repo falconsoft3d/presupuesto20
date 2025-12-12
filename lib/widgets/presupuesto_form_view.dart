@@ -5,7 +5,10 @@ import '../providers/companias_provider.dart';
 import '../providers/monedas_provider.dart';
 import '../providers/estados_provider.dart';
 import '../providers/settings_provider.dart';
+import '../providers/conceptos_provider.dart';
 import '../database/database.dart';
+import '../screens/conceptos_screen.dart';
+import '../screens/conceptos_tree_screen.dart';
 
 class PresupuestoFormView extends StatefulWidget {
   final Presupuesto? presupuesto;
@@ -104,8 +107,27 @@ class _PresupuestoFormViewState extends State<PresupuestoFormView> {
                       backgroundColor: settings.themeColor,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
                     ),
                   ),
+                  if (widget.presupuesto != null) ...[
+                    const SizedBox(width: 8),
+                    ElevatedButton.icon(
+                      onPressed: _openConceptosTree,
+                      icon: const Icon(Icons.account_tree, size: 18),
+                      label: const Text('Árbol de Conceptos'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue.shade600,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -372,5 +394,17 @@ class _PresupuestoFormViewState extends State<PresupuestoFormView> {
         );
       }
     }
+  }
+
+  void _openConceptosTree() {
+    if (widget.presupuesto == null) return;
+    
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => ConceptosTreeScreen(
+          presupuesto: widget.presupuesto!,
+        ),
+      ),
+    );
   }
 }

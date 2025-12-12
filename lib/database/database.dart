@@ -7,12 +7,12 @@ import 'tables.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(tables: [Obras, Proyectos, Presupuestos, Contactos, Productos, Empleados, Usuarios, Companias, UnidadesMedida, Monedas, CategoriasProductos, Estados, Conceptos])
+@DriftDatabase(tables: [Obras, Proyectos, Presupuestos, Contactos, Productos, Empleados, Usuarios, Companias, UnidadesMedida, Monedas, CategoriasProductos, Estados, Conceptos, MensajesChat, MensajesConceptos, AdjuntosConceptos, Integradores])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 17;
+  int get schemaVersion => 20;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -75,6 +75,16 @@ class AppDatabase extends _$AppDatabase {
       if (from < 17) {
         await m.createTable(conceptos);
       }
+      if (from < 18) {
+        await m.createTable(mensajesChat);
+      }
+      if (from < 19) {
+        await m.createTable(mensajesConceptos);
+        await m.createTable(adjuntosConceptos);
+      }
+      if (from < 20) {
+        await m.createTable(integradores);
+      }
     },
   );
 
@@ -96,7 +106,8 @@ class AppDatabase extends _$AppDatabase {
       (delete(obras)..where((t) => t.id.equals(id))).go();
 
   // CRUD Operations for Presupuestos
-  Future<List<Presupuesto>> getAllPresupuestos() => select(presupuestos).get();
+  Future<List<Presupuesto>> getAllPresupuestos() => 
+      (select(presupuestos)..orderBy([(t) => OrderingTerm.desc(t.fechaCreacion)])).get();
   
   Future<Presupuesto> getPresupuesto(int id) => 
       (select(presupuestos)..where((t) => t.id.equals(id))).getSingle();
@@ -282,6 +293,9 @@ class AppDatabase extends _$AppDatabase {
   // CRUD Operations for Conceptos
   Future<List<Concepto>> getAllConceptos() => select(conceptos).get();
   
+  Future<List<Concepto>> getConceptosByPresupuesto(int presupuestoId) => 
+      (select(conceptos)..where((t) => t.presupuestoId.equals(presupuestoId))).get();
+  
   Future<Concepto> getConcepto(int id) => 
       (select(conceptos)..where((t) => t.id.equals(id))).getSingle();
   
@@ -295,6 +309,77 @@ class AppDatabase extends _$AppDatabase {
   
   Future<int> deleteConcepto(int id) => 
       (delete(conceptos)..where((t) => t.id.equals(id))).go();
+
+  // CRUD Operations for MensajesChat
+  Future<List<MensajeChat>> getAllMensajesChat() => 
+      (select(mensajesChat)..orderBy([(t) => OrderingTerm.asc(t.fechaCreacion)])).get();
+  
+  Stream<List<MensajeChat>> watchAllMensajesChat() => 
+      (select(mensajesChat)..orderBy([(t) => OrderingTerm.asc(t.fechaCreacion)])).watch();
+  
+  Future<int> insertMensajeChat(MensajesChatCompanion mensaje) => 
+      into(mensajesChat).insert(mensaje);
+  
+  Future<int> deleteAllMensajesChat() => 
+      delete(mensajesChat).go();
+
+  // CRUD Operations for MensajesConceptos
+  Future<List<MensajeConcepto>> getMensajesConcepto(int conceptoId) => 
+      (select(mensajesConceptos)
+        ..where((t) => t.conceptoId.equals(conceptoId))
+        ..orderBy([(t) => OrderingTerm.asc(t.fechaCreacion)])).get();
+  
+  Stream<List<MensajeConcepto>> watchMensajesConcepto(int conceptoId) => 
+      (select(mensajesConceptos)
+        ..where((t) => t.conceptoId.equals(conceptoId))
+        ..orderBy([(t) => OrderingTerm.asc(t.fechaCreacion)])).watch();
+  
+  Future<int> insertMensajeConcepto(MensajesConceptosCompanion mensaje) => 
+      into(mensajesConceptos).insert(mensaje);
+  
+  Future<bool> updateMensajeConcepto(MensajeConcepto mensaje) => 
+      update(mensajesConceptos).replace(mensaje);
+  
+  Future<int> deleteMensajeConcepto(int id) => 
+      (delete(mensajesConceptos)..where((t) => t.id.equals(id))).go();
+
+  // CRUD Operations for AdjuntosConceptos
+  Future<List<AdjuntoConcepto>> getAdjuntosConcepto(int conceptoId) => 
+      (select(adjuntosConceptos)
+        ..where((t) => t.conceptoId.equals(conceptoId))
+        ..orderBy([(t) => OrderingTerm.desc(t.fechaCreacion)])).get();
+  
+  Stream<List<AdjuntoConcepto>> watchAdjuntosConcepto(int conceptoId) => 
+      (select(adjuntosConceptos)
+        ..where((t) => t.conceptoId.equals(conceptoId))
+        ..orderBy([(t) => OrderingTerm.desc(t.fechaCreacion)])).watch();
+  
+  Future<int> insertAdjuntoConcepto(AdjuntosConceptosCompanion adjunto) => 
+      into(adjuntosConceptos).insert(adjunto);
+  
+  Future<bool> updateAdjuntoConcepto(AdjuntoConcepto adjunto) => 
+      update(adjuntosConceptos).replace(adjunto);
+  
+  Future<int> deleteAdjuntoConcepto(int id) => 
+      (delete(adjuntosConceptos)..where((t) => t.id.equals(id))).go();
+
+  // CRUD Operations for Integradores
+  Future<List<Integrador>> getAllIntegradores() => 
+      (select(integradores)..orderBy([(t) => OrderingTerm.desc(t.fechaCreacion)])).get();
+  
+  Future<Integrador> getIntegrador(int id) => 
+      (select(integradores)..where((t) => t.id.equals(id))).getSingle();
+  
+  Stream<List<Integrador>> watchAllIntegradores() => select(integradores).watch();
+  
+  Future<int> insertIntegrador(IntegradoresCompanion integrador) => 
+      into(integradores).insert(integrador);
+  
+  Future<bool> updateIntegrador(Integrador integrador) => 
+      update(integradores).replace(integrador);
+  
+  Future<int> deleteIntegrador(int id) => 
+      (delete(integradores)..where((t) => t.id.equals(id))).go();
 }
 
 LazyDatabase _openConnection() {

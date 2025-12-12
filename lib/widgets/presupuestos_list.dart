@@ -32,17 +32,17 @@ class PresupuestosList extends StatelessWidget {
           columns: [
             ColumnConfig(
               label: 'Código',
-              width: 150,
+              width: 200,
               getValue: (presupuesto) => presupuesto.codigo,
             ),
             ColumnConfig(
               label: 'Nombre',
-              width: 300,
+              width: 450,
               getValue: (presupuesto) => presupuesto.nombre,
             ),
             ColumnConfig(
               label: 'Compañía',
-              width: 200,
+              width: 250,
               getValue: (presupuesto) {
                 if (presupuesto.companiaId == null) return '-';
                 final compania = companiasProvider.getCompaniaById(presupuesto.companiaId!);

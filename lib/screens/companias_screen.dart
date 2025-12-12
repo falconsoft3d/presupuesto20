@@ -518,6 +518,7 @@ class _CompaniasScreenState extends State<CompaniasScreen> {
                             builder: (context, monedasProvider, _) {
                               return DropdownButtonFormField<int?>(
                                 value: monedaId,
+                                isExpanded: true,
                                 decoration: const InputDecoration(
                                   labelText: 'Moneda',
                                   prefixIcon: Icon(Icons.monetization_on_outlined),
@@ -536,9 +537,8 @@ class _CompaniasScreenState extends State<CompaniasScreen> {
                                   }),
                                 ],
                                 onChanged: (value) {
-                                  setFormState(() {
-                                    monedaId = value;
-                                  });
+                                  monedaId = value;
+                                  setFormState(() {});
                                 },
                               );
                             },

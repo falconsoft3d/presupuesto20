@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import '../providers/obras_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/auth_provider.dart';
@@ -16,11 +18,13 @@ import 'settings_screen.dart';
 import 'proyectos_screen.dart';
 import 'presupuestos_screen.dart';
 import 'conceptos_screen.dart';
+import 'integradores_screen.dart';
 import 'productos_screen.dart';
 import 'empleados_screen.dart';
 import 'usuarios_screen.dart';
 import 'companias_screen.dart';
 import 'datos_maestros_screen.dart';
+import 'chatgpt_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -36,6 +40,36 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isCreatingContacto = false;
   String _appSearchQuery = '';
   final TextEditingController _appSearchController = TextEditingController();
+  DateTime _currentDateTime = DateTime.now();
+  bool _localeInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Inicializar locale y actualizar la hora cada segundo
+    _initLocale();
+    Future.delayed(Duration.zero, () {
+      _updateDateTime();
+    });
+  }
+
+  Future<void> _initLocale() async {
+    await initializeDateFormatting('es', null);
+    if (mounted) {
+      setState(() {
+        _localeInitialized = true;
+      });
+    }
+  }
+
+  void _updateDateTime() {
+    if (mounted) {
+      setState(() {
+        _currentDateTime = DateTime.now();
+      });
+      Future.delayed(const Duration(seconds: 1), _updateDateTime);
+    }
+  }
 
   void _showNewObraDialog() {
     showDialog(
@@ -323,6 +357,71 @@ class _HomeScreenState extends State<HomeScreen> {
                       )
                     : _buildAppContent(),
           ),
+          
+          // Status Bar
+          Container(
+            height: 28,
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              border: Border(
+                top: BorderSide(color: Colors.grey.shade300),
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              children: [
+                Icon(Icons.access_time, size: 14, color: Colors.grey[700]),
+                const SizedBox(width: 6),
+                Text(
+                  _localeInitialized 
+                    ? DateFormat('EEEE, d MMMM yyyy • HH:mm:ss', 'es').format(_currentDateTime)
+                    : DateFormat('yyyy-MM-dd HH:mm:ss').format(_currentDateTime),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[700],
+                  ),
+                ),
+                const Spacer(),
+                Consumer2<SettingsProvider, CompaniasProvider>(
+                  builder: (context, settings, companiasProvider, child) {
+                    if (settings.companiaActualId != null) {
+                      final companiaActual = companiasProvider.companias
+                          .where((c) => c.id == settings.companiaActualId)
+                          .firstOrNull;
+                      if (companiaActual != null) {
+                        return Row(
+                          children: [
+                            Icon(Icons.business, size: 14, color: Colors.grey[700]),
+                            const SizedBox(width: 6),
+                            Text(
+                              companiaActual.nombre,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[700],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                          ],
+                        );
+                      }
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
+                Icon(Icons.person, size: 14, color: Colors.grey[700]),
+                const SizedBox(width: 6),
+                Text(
+                  authProvider.currentUser?.nombre ?? '',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[700],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -336,9 +435,11 @@ class _HomeScreenState extends State<HomeScreen> {
           {'title': 'Proyectos', 'icon': Icons.account_tree, 'color': const Color(0xFF2ECC71), 'app': 'proyectos'},
           {'title': 'Presupuestos', 'icon': Icons.description, 'color': const Color(0xFF8E44AD), 'app': 'presupuestos'},
           {'title': 'Conceptos', 'icon': Icons.category, 'color': const Color(0xFF9B59B6), 'app': 'conceptos'},
+          {'title': 'Integrador', 'icon': Icons.upload_file, 'color': const Color(0xFFE74C3C), 'app': 'integrador'},
           {'title': 'Contactos', 'icon': Icons.contacts, 'color': const Color(0xFF00A09D), 'app': 'contactos'},
           {'title': 'Productos', 'icon': Icons.inventory_2, 'color': const Color(0xFFE67E22), 'app': 'productos'},
           {'title': 'Empleados', 'icon': Icons.badge, 'color': const Color(0xFF34495E), 'app': 'empleados'},
+          {'title': 'ChatGPT', 'icon': Icons.chat, 'color': const Color(0xFF10A37F), 'app': 'chatgpt'},
           {'title': 'Datos', 'icon': Icons.data_object, 'color': const Color(0xFF16A085), 'app': 'datos_maestros', 'badge': 'ADMIN'},
         ];
         
@@ -361,7 +462,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
         return Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFF0F0F0),
+            color: settings.homeBackgroundColor,
             image: settings.homeBackgroundPath != null && 
                    File(settings.homeBackgroundPath!).existsSync()
                 ? DecorationImage(
@@ -532,6 +633,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
                 badge: 'ADMIN',
               ),
+            _buildAppCard(
+              title: 'ChatGPT',
+              icon: Icons.chat,
+              color: const Color(0xFF10A37F),
+              onTap: () {
+                setState(() {
+                  _selectedView = 'app';
+                  _selectedApp = 'chatgpt';
+                });
+              },
+            ),
           ],
         ),
       ),
@@ -575,15 +687,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 : _selectedApp == 'presupuestos'
                     ? const PresupuestosScreen()
                     : _selectedApp == 'conceptos'
-                        ? ConceptosScreen(
-                            onBack: () {
-                              setState(() {
-                                _selectedView = 'home';
-                                _selectedApp = null;
-                              });
-                            },
-                          )
-                        : _selectedApp == 'contactos'
+                        ? const ConceptosScreen()
+                        : _selectedApp == 'integrador'
+                            ? const IntegradoresScreen()
+                            : _selectedApp == 'contactos'
                 ? (_isCreatingContacto || _selectedContacto != null
                     ? ContactoFormView(
                         contacto: _selectedContacto,
@@ -638,7 +745,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                       });
                                     },
                                   )
-                                : const ObrasList(),
+                                : _selectedApp == 'chatgpt'
+                                    ? const ChatScreen()
+                                    : const ObrasList(),
           ),
         ),
       ],

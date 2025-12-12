@@ -154,3 +154,45 @@ class Conceptos extends Table {
   DateTimeColumn get fechaModificacion => dateTime().withDefault(currentDateAndTime)();
 }
 
+@DataClassName('MensajeChat')
+class MensajesChat extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get mensaje => text()();
+  TextColumn get rol => text().withLength(min: 1, max: 20)(); // user, assistant, system
+  DateTimeColumn get fechaCreacion => dateTime().withDefault(currentDateAndTime)();
+}
+
+@DataClassName('MensajeConcepto')
+class MensajesConceptos extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get conceptoId => integer().references(Conceptos, #id, onDelete: KeyAction.cascade)();
+  IntColumn get usuarioId => integer().nullable().references(Usuarios, #id)();
+  TextColumn get mensaje => text()();
+  DateTimeColumn get fechaCreacion => dateTime().withDefault(currentDateAndTime)();
+}
+
+@DataClassName('AdjuntoConcepto')
+class AdjuntosConceptos extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get conceptoId => integer().references(Conceptos, #id, onDelete: KeyAction.cascade)();
+  IntColumn get usuarioId => integer().nullable().references(Usuarios, #id)();
+  TextColumn get nombreArchivo => text().withLength(min: 1, max: 255)();
+  TextColumn get rutaArchivo => text()();
+  TextColumn get tipoArchivo => text().withLength(min: 1, max: 100)(); // pdf, jpg, png, doc, etc.
+  IntColumn get tamanoBytes => integer()();
+  DateTimeColumn get fechaCreacion => dateTime().withDefault(currentDateAndTime)();
+}
+
+@DataClassName('Integrador')
+class Integradores extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get secuencia => text().withLength(min: 1, max: 50)();
+  TextColumn get tipo => text().withLength(min: 1, max: 20)(); // 2000, bc3
+  TextColumn get nombreArchivo => text().withLength(min: 1, max: 255)();
+  TextColumn get rutaArchivo => text()();
+  TextColumn get estado => text().withLength(min: 1, max: 50).withDefault(const Constant('Pendiente'))(); // Pendiente, Procesado, Error
+  TextColumn get resultado => text().nullable()(); // JSON con resultado del procesamiento
+  DateTimeColumn get fechaCreacion => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get fechaProcesamiento => dateTime().nullable()();
+}
+

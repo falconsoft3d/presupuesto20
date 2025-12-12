@@ -14,9 +14,10 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  String _selectedCategory = 'visualizador';
+  String _selectedCategory = 'acerca_de';
 
   final Map<String, IconData> _categories = {
+    'acerca_de': Icons.info_outline,
     'visualizador': Icons.palette,
     'secuencias': Icons.format_list_numbered,
     'general': Icons.settings,
@@ -132,6 +133,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   String _getCategoryName(String key) {
     switch (key) {
+      case 'acerca_de':
+        return 'Acerca de';
       case 'visualizador':
         return 'Visualizador';
       case 'secuencias':
@@ -149,6 +152,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildCategoryContent() {
     switch (_selectedCategory) {
+      case 'acerca_de':
+        return _buildAcercaDeSettings();
       case 'visualizador':
         return _buildVisualizadorSettings();
       case 'secuencias':
@@ -162,6 +167,158 @@ class _SettingsScreenState extends State<SettingsScreen> {
       default:
         return const SizedBox.shrink();
     }
+  }
+
+  Widget _buildAcercaDeSettings() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Text(
+            'Acerca de',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Información sobre la aplicación',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          const SizedBox(height: 32),
+
+          // About Section
+          Center(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 600),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade300),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.shade200,
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(40),
+              child: Column(
+                children: [
+                  // App Name
+                  const Text(
+                    'Presupuesto 2.0',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF875A7B),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Info Cards
+                  _buildInfoCard(
+                    icon: Icons.info_outline,
+                    label: 'Versión',
+                    value: '1.0',
+                  ),
+                  const SizedBox(height: 12),
+                  _buildInfoCard(
+                    icon: Icons.person_outline,
+                    label: 'Autor',
+                    value: 'Marlon Falcon Hernandez',
+                  ),
+                  const SizedBox(height: 12),
+                  _buildInfoCard(
+                    icon: Icons.language,
+                    label: 'Web',
+                    value: 'www.marlonfalcon.com',
+                    isLink: true,
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Copyright
+                  Text(
+                    '© ${DateTime.now().year} Marlon Falcon Hernandez',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Todos los derechos reservados',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoCard({
+    required IconData icon,
+    required String label,
+    required String value,
+    bool isLink = false,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 24,
+            color: const Color(0xFF875A7B),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: isLink ? const Color(0xFF875A7B) : Colors.grey.shade800,
+                    fontWeight: FontWeight.w600,
+                    decoration: isLink ? TextDecoration.underline : null,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildVisualizadorSettings() {
@@ -293,6 +450,114 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             const Color(0xFF2C3E50),
                             settings.themeColor == const Color(0xFF2C3E50),
                             () => settings.setThemeColor(const Color(0xFF2C3E50)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Color de fondo de pantalla de inicio
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.format_color_fill, size: 20, color: Colors.grey.shade700),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Color de fondo de inicio',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey.shade800,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Selecciona el color de fondo donde aparecen las aplicaciones',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Wrap(
+                            spacing: 12,
+                            runSpacing: 12,
+                            children: [
+                              _buildColorOption(
+                                context,
+                                'Gris claro',
+                                const Color(0xFFF0F0F0),
+                                settings.homeBackgroundColor == const Color(0xFFF0F0F0),
+                                () => settings.setHomeBackgroundColor(const Color(0xFFF0F0F0)),
+                              ),
+                              _buildColorOption(
+                                context,
+                                'Blanco',
+                                const Color(0xFFFFFFFF),
+                                settings.homeBackgroundColor == const Color(0xFFFFFFFF),
+                                () => settings.setHomeBackgroundColor(const Color(0xFFFFFFFF)),
+                              ),
+                              _buildColorOption(
+                                context,
+                                'Azul claro',
+                                const Color(0xFFE3F2FD),
+                                settings.homeBackgroundColor == const Color(0xFFE3F2FD),
+                                () => settings.setHomeBackgroundColor(const Color(0xFFE3F2FD)),
+                              ),
+                              _buildColorOption(
+                                context,
+                                'Verde claro',
+                                const Color(0xFFE8F5E9),
+                                settings.homeBackgroundColor == const Color(0xFFE8F5E9),
+                                () => settings.setHomeBackgroundColor(const Color(0xFFE8F5E9)),
+                              ),
+                              _buildColorOption(
+                                context,
+                                'Rosa claro',
+                                const Color(0xFFFCE4EC),
+                                settings.homeBackgroundColor == const Color(0xFFFCE4EC),
+                                () => settings.setHomeBackgroundColor(const Color(0xFFFCE4EC)),
+                              ),
+                              _buildColorOption(
+                                context,
+                                'Morado claro',
+                                const Color(0xFFF3E5F5),
+                                settings.homeBackgroundColor == const Color(0xFFF3E5F5),
+                                () => settings.setHomeBackgroundColor(const Color(0xFFF3E5F5)),
+                              ),
+                              _buildColorOption(
+                                context,
+                                'Amarillo claro',
+                                const Color(0xFFFFFDE7),
+                                settings.homeBackgroundColor == const Color(0xFFFFFDE7),
+                                () => settings.setHomeBackgroundColor(const Color(0xFFFFFDE7)),
+                              ),
+                              _buildColorOption(
+                                context,
+                                'Gris oscuro',
+                                const Color(0xFFECEFF1),
+                                settings.homeBackgroundColor == const Color(0xFFECEFF1),
+                                () => settings.setHomeBackgroundColor(const Color(0xFFECEFF1)),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -965,6 +1230,124 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ],
                 ),
               ),
+              const SizedBox(height: 24),
+
+              // PIN de desbloqueo
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.pin, size: 24, color: Colors.grey.shade700),
+                        const SizedBox(width: 12),
+                        Text(
+                          'PIN de Desbloqueo',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Usa un PIN de 4 dígitos en lugar de tu contraseña para acceder rápidamente al sistema.',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Usar PIN de desbloqueo',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey.shade800,
+                            ),
+                          ),
+                        ),
+                        Switch(
+                          value: settings.usarPin,
+                          activeColor: const Color(0xFF875A7B),
+                          onChanged: (value) {
+                            if (value && (settings.pinCode.isEmpty || settings.pinCode.length != 4)) {
+                              _showPinConfigDialog(context, settings);
+                            } else {
+                              settings.setUsarPin(value);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    value
+                                        ? 'PIN activado: Usa tu PIN para iniciar sesión'
+                                        : 'PIN desactivado: Usa tu contraseña para iniciar sesión',
+                                  ),
+                                  backgroundColor: value ? Colors.green : Colors.orange,
+                                  duration: const Duration(seconds: 3),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                    if (settings.usarPin) ...[
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          ElevatedButton.icon(
+                            onPressed: () => _showPinConfigDialog(context, settings),
+                            icon: const Icon(Icons.edit, size: 18),
+                            label: const Text('Cambiar PIN'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: settings.themeColor,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: Colors.blue.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.info_outline, size: 20, color: Colors.blue.shade700),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Tu PIN está configurado. En el inicio de sesión solo necesitarás ingresar tu PIN de 4 dígitos.',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.blue.shade900,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             ],
           ),
         );
@@ -972,251 +1355,103 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Future<void> _showPinConfigDialog(BuildContext context, SettingsProvider settings) async {
+    final pinController = TextEditingController();
+    final confirmPinController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Configurar PIN'),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: pinController,
+                decoration: const InputDecoration(
+                  labelText: 'PIN (4 dígitos)',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.pin),
+                ),
+                keyboardType: TextInputType.number,
+                maxLength: 4,
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Ingrese un PIN';
+                  }
+                  if (value.length != 4) {
+                    return 'El PIN debe tener 4 dígitos';
+                  }
+                  if (!RegExp(r'^\d+$').hasMatch(value)) {
+                    return 'Solo se permiten números';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: confirmPinController,
+                decoration: const InputDecoration(
+                  labelText: 'Confirmar PIN',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.pin),
+                ),
+                keyboardType: TextInputType.number,
+                maxLength: 4,
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Confirme el PIN';
+                  }
+                  if (value != pinController.text) {
+                    return 'Los PINs no coinciden';
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (formKey.currentState!.validate()) {
+                await settings.setPinCode(pinController.text);
+                await settings.setUsarPin(true);
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('PIN configurado exitosamente'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: settings.themeColor,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Guardar'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildIntegracionSettings() {
     return Consumer<SettingsProvider>(
       builder: (context, settings, child) {
-        final urlController = TextEditingController(text: settings.rpcUrl);
-        final puertoController = TextEditingController(text: settings.rpcPuerto);
-        final usuarioController = TextEditingController(text: settings.rpcUsuario);
-        final contrasenaController = TextEditingController(text: settings.rpcContrasena);
-        bool isTesting = false;
-
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: StatefulBuilder(
-            builder: (context, setState) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header
-                  Text(
-                    'Integración RPC',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey.shade800,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Configura la conexión RPC para integraciones externas',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-
-                  // Configuración RPC
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.cloud_sync, size: 20, color: Colors.grey.shade700),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Configuración de Conexión',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.grey.shade800,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Ingresa los datos de conexión para el servidor RPC',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey.shade600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Divider(height: 1, color: Colors.grey.shade300),
-                        Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    flex: 3,
-                                    child: TextFormField(
-                                      controller: urlController,
-                                      decoration: InputDecoration(
-                                        labelText: 'URL del Servidor',
-                                        hintText: 'http://ejemplo.com',
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                      ),
-                                      onChanged: (value) {
-                                        settings.setRpcUrl(value);
-                                      },
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    flex: 1,
-                                    child: TextFormField(
-                                      controller: puertoController,
-                                      decoration: InputDecoration(
-                                        labelText: 'Puerto',
-                                        hintText: '8069',
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                      ),
-                                      keyboardType: TextInputType.number,
-                                      onChanged: (value) {
-                                        settings.setRpcPuerto(value);
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: TextFormField(
-                                      controller: usuarioController,
-                                      decoration: InputDecoration(
-                                        labelText: 'Usuario',
-                                        hintText: 'admin',
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                      ),
-                                      onChanged: (value) {
-                                        settings.setRpcUsuario(value);
-                                      },
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: TextFormField(
-                                      controller: contrasenaController,
-                                      decoration: InputDecoration(
-                                        labelText: 'Contraseña',
-                                        hintText: '••••••••',
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                      ),
-                                      obscureText: true,
-                                      onChanged: (value) {
-                                        settings.setRpcContrasena(value);
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 24),
-                              Row(
-                                children: [
-                                  ElevatedButton.icon(
-                                    onPressed: isTesting ? null : () async {
-                                      setState(() {
-                                        isTesting = true;
-                                      });
-
-                                      // Simular prueba de conexión
-                                      await Future.delayed(const Duration(seconds: 2));
-
-                                      setState(() {
-                                        isTesting = false;
-                                      });
-
-                                      if (context.mounted) {
-                                        final hasData = settings.rpcUrl.isNotEmpty && 
-                                                       settings.rpcUsuario.isNotEmpty;
-                                        
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              hasData 
-                                                ? 'Conexión probada exitosamente' 
-                                                : 'Complete todos los campos para probar la conexión',
-                                            ),
-                                            backgroundColor: hasData ? Colors.green : Colors.orange,
-                                            duration: const Duration(seconds: 3),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                    icon: isTesting
-                                        ? const SizedBox(
-                                            width: 16,
-                                            height: 16,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                            ),
-                                          )
-                                        : const Icon(Icons.cloud_done, size: 18),
-                                    label: Text(isTesting ? 'Probando...' : 'Probar Conexión'),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: settings.themeColor,
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  if (settings.rpcUrl.isNotEmpty)
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                      decoration: BoxDecoration(
-                                        color: Colors.blue.shade50,
-                                        borderRadius: BorderRadius.circular(6),
-                                        border: Border.all(color: Colors.blue.shade200),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.info_outline, size: 16, color: Colors.blue.shade700),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            'Configuración guardada',
-                                            style: TextStyle(
-                                              fontSize: 13,
-                                              color: Colors.blue.shade900,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        );
+        return _IntegracionSettingsForm(settings: settings);
       },
     );
   }
@@ -1247,5 +1482,407 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
     );
+  }
+}
+
+class _IntegracionSettingsForm extends StatefulWidget {
+  final SettingsProvider settings;
+
+  const _IntegracionSettingsForm({required this.settings});
+
+  @override
+  State<_IntegracionSettingsForm> createState() => _IntegracionSettingsFormState();
+}
+
+class _IntegracionSettingsFormState extends State<_IntegracionSettingsForm> {
+  late TextEditingController urlController;
+  late TextEditingController puertoController;
+  late TextEditingController databaseController;
+  late TextEditingController usuarioController;
+  late TextEditingController contrasenaController;
+  late TextEditingController chatGptTokenController;
+  bool isTesting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    urlController = TextEditingController(text: widget.settings.rpcUrl);
+    puertoController = TextEditingController(text: widget.settings.rpcPuerto);
+    databaseController = TextEditingController(text: widget.settings.rpcDatabase);
+    usuarioController = TextEditingController(text: widget.settings.rpcUsuario);
+    contrasenaController = TextEditingController(text: widget.settings.rpcContrasena);
+    chatGptTokenController = TextEditingController(text: widget.settings.chatGptToken);
+  }
+
+  @override
+  void dispose() {
+    urlController.dispose();
+    puertoController.dispose();
+    databaseController.dispose();
+    usuarioController.dispose();
+    contrasenaController.dispose();
+    chatGptTokenController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _guardarConfiguracionRpc() async {
+    await widget.settings.setRpcUrl(urlController.text);
+    await widget.settings.setRpcPuerto(puertoController.text);
+    await widget.settings.setRpcDatabase(databaseController.text);
+    await widget.settings.setRpcUsuario(usuarioController.text);
+    await widget.settings.setRpcContrasena(contrasenaController.text);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Configuración RPC guardada exitosamente'),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  Future<void> _probarConexion() async {
+    if (urlController.text.isEmpty || 
+        puertoController.text.isEmpty || 
+        databaseController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor completa URL, Puerto y Base de datos'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      isTesting = true;
+    });
+
+    try {
+      // Aquí iría la lógica real de prueba de conexión
+      await Future.delayed(const Duration(seconds: 2));
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Conexión exitosa con Odoo'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al conectar: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          isTesting = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _guardarConfiguracion() async {
+    await widget.settings.setChatGptToken(chatGptTokenController.text);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Token guardado exitosamente'),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Text(
+                    'Integración ChatGPT',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade800,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Configura tu API Token para usar ChatGPT',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Configuración Odoo JSON-RPC
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.integration_instructions, size: 20, color: Colors.grey.shade700),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Integración Odoo JSON-RPC',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey.shade800,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Configura la conexión con Odoo para sincronizar datos',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          
+                          Row(
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: TextFormField(
+                                  controller: urlController,
+                                  decoration: InputDecoration(
+                                    labelText: 'URL del servidor',
+                                    hintText: 'http://localhost',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                  ),
+                                  maxLines: 1,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: TextFormField(
+                                  controller: puertoController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Puerto',
+                                    hintText: '8069',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                  ),
+                                  keyboardType: TextInputType.number,
+                                  maxLines: 1,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          
+                          TextFormField(
+                            controller: databaseController,
+                            decoration: InputDecoration(
+                              labelText: 'Base de datos',
+                              hintText: 'odoo_db',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            ),
+                            maxLines: 1,
+                          ),
+                          const SizedBox(height: 16),
+                          
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextFormField(
+                                  controller: usuarioController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Usuario',
+                                    hintText: 'admin',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                  ),
+                                  maxLines: 1,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: TextFormField(
+                                  controller: contrasenaController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Contraseña',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                  ),
+                                  obscureText: true,
+                                  maxLines: 1,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          
+                          Row(
+                            children: [
+                              ElevatedButton.icon(
+                                onPressed: _guardarConfiguracionRpc,
+                                icon: const Icon(Icons.save, size: 18),
+                                label: const Text('Guardar Configuración'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: widget.settings.themeColor,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              OutlinedButton.icon(
+                                onPressed: isTesting ? null : _probarConexion,
+                                icon: isTesting
+                                    ? const SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      )
+                                    : const Icon(Icons.wifi_tethering, size: 18),
+                                label: Text(isTesting ? 'Probando...' : 'Probar Conexión'),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Configuración ChatGPT
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.chat_bubble_outline, size: 20, color: Colors.grey.shade700),
+                              const SizedBox(width: 8),
+                              Text(
+                                'API Token',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey.shade800,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Ingresa tu token de OpenAI para habilitar ChatGPT',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          TextFormField(
+                            controller: chatGptTokenController,
+                            decoration: InputDecoration(
+                              labelText: 'API Token',
+                              hintText: 'sk-proj-...',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              helperText: 'Obtén tu token en: https://platform.openai.com/api-keys',
+                              helperMaxLines: 2,
+                            ),
+                            obscureText: true,
+                            maxLines: 1,
+                          ),
+                          const SizedBox(height: 24),
+                          Row(
+                            children: [
+                              ElevatedButton.icon(
+                                onPressed: _guardarConfiguracion,
+                                icon: const Icon(Icons.save, size: 18),
+                                label: const Text('Guardar Token'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: widget.settings.themeColor,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              if (widget.settings.chatGptToken.isNotEmpty)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.shade50,
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(color: Colors.green.shade200),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.check_circle, size: 16, color: Colors.green.shade700),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'Token configurado',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.green.shade900,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
   }
 }

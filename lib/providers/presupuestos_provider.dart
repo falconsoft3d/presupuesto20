@@ -100,12 +100,4 @@ class PresupuestosProvider with ChangeNotifier {
       rethrow;
     }
   }
-
-  Presupuesto? getPresupuestoById(int id) {
-    try {
-      return _presupuestos.firstWhere((p) => p.id == id);
-    } catch (e) {
-      return null;
-    }
-  }
 }

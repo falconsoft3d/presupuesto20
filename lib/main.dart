@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'database/database.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/lock_screen.dart';
+import 'screens/pin_login_screen.dart';
 import 'providers/obras_provider.dart';
 import 'providers/proyectos_provider.dart';
 import 'providers/contactos_provider.dart';
@@ -18,11 +20,17 @@ import 'providers/estados_provider.dart';
 import 'providers/empleados_provider.dart';
 import 'providers/presupuestos_provider.dart';
 import 'providers/conceptos_provider.dart';
+import 'providers/integradores_provider.dart';
 import 'providers/settings_provider.dart';
 import 'providers/auth_provider.dart';
+import 'providers/chat_provider.dart';
+import 'services/openai_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Inicializar locales de fecha para español
+  await initializeDateFormatting('es', null);
   
   // Configurar ventana para escritorio
   await windowManager.ensureInitialized();
@@ -74,6 +82,10 @@ class MyApp extends StatelessWidget {
           create: (context) => ConceptosProvider(context.read<AppDatabase>()),
           update: (context, db, previous) => previous ?? ConceptosProvider(db),
         ),
+        ChangeNotifierProxyProvider<AppDatabase, IntegradoresProvider>(
+          create: (context) => IntegradoresProvider(context.read<AppDatabase>()),
+          update: (context, db, previous) => previous ?? IntegradoresProvider(db),
+        ),
         ChangeNotifierProxyProvider<AppDatabase, ContactosProvider>(
           create: (context) => ContactosProvider(context.read<AppDatabase>()),
           update: (context, db, previous) => previous ?? ContactosProvider(db),
@@ -109,6 +121,29 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProxyProvider<AppDatabase, EstadosProvider>(
           create: (context) => EstadosProvider(context.read<AppDatabase>()),
           update: (context, db, previous) => previous ?? EstadosProvider(db),
+        ),
+        ChangeNotifierProxyProvider2<AppDatabase, SettingsProvider, ChatProvider>(
+          create: (context) {
+            final db = context.read<AppDatabase>();
+            final settings = context.read<SettingsProvider>();
+            return ChatProvider(
+              database: db,
+              openAIService: OpenAIService(apiKey: settings.chatGptToken),
+            );
+          },
+          update: (context, db, settings, previous) {
+            if (previous == null) {
+              return ChatProvider(
+                database: db,
+                openAIService: OpenAIService(apiKey: settings.chatGptToken),
+              );
+            }
+            // Si el token cambió, actualizar el servicio
+            return ChatProvider(
+              database: db,
+              openAIService: OpenAIService(apiKey: settings.chatGptToken),
+            );
+          },
         ),
       ],
       child: Consumer<SettingsProvider>(
@@ -147,11 +182,17 @@ class AuthWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
+    final settingsProvider = context.watch<SettingsProvider>();
 
     if (!authProvider.isAuthenticated) {
       return const LoginScreen();
     } else if (authProvider.isLocked) {
-      return const LockScreen();
+      // Si hay PIN habilitado, usar PinLoginScreen, sino LockScreen
+      if (settingsProvider.usarPin) {
+        return PinLoginScreen();
+      } else {
+        return const LockScreen();
+      }
     } else {
       return const HomeScreen();
     }

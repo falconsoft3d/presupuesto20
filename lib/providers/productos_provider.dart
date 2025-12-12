@@ -14,6 +14,14 @@ class ProductosProvider with ChangeNotifier {
   List<Producto> get productos => _productos;
   bool get isLoading => _isLoading;
 
+  Producto? getProductoById(int id) {
+    try {
+      return _productos.firstWhere((producto) => producto.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<void> loadProductos() async {
     _isLoading = true;
     notifyListeners();
